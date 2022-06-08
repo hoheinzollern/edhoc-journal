@@ -1,0 +1,23 @@
+* TODO
+0. Move old paper to the new template and see how much space we have
+1. New/different section structure. As I understand it, needed to avoid self-plagiarism
+2. Rewrite/tweak intro/conclusions etc. As I understand it, needed to avoid self-plagiarism
+3. Scan v1 of the paper on arxiv (it is very different compared to final paper) and extract ideas that we could reuse.
+4. Scan latest version of EDHOC IETF draft and extract ideas for small pieces that can be elaborated/analyzed, e.g., implementation aspects.
+5. Analyze error handling and capability negotiation
+- small pen-and-paper model in TTL or similar? with hand-proofs to support prose-based analysis?
+- write a new section with the results
+6. Analyze the retransmission scheme
+- prose-based analysis
+- write a new section the results
+7. Scan LAKE-WG mailing list for use case discussions and implementation problems raised ==> something we can make use of?
+8. ...
+
+* Prior art
+- Modelling ciphersuite and version negotiation in the TLS protocol, Benjamin Dowling and Douglas Stebila 2015
+- Triple Handshakes and Cookie Cutters: Breaking and Fixing Authentication over TLS, Barghavan et al 2014
+- Cryptographically Verified Implementations for TLS, Barghavan et al 2008
+
+* Diff with latest version
+  https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://www.ietf.org/archive/id/draft-ietf-lake-edhoc-05.txt&url2=https://www.ietf.org/archive/id/draft-ietf-lake-edhoc-13.txt
+
