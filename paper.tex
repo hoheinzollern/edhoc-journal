@@ -257,6 +257,36 @@ successfully analyze the protocol are required when working with this tool.
 \input{edhocFormalization}
 
 %-------------------------------------------------------------------------- sec
+\section{\uppercase{Denial of Service}}
+\label{sec:dos}
+\mEdhoc{} includes no specific measures for countering Denial of Service (DoS)
+attacks and delegates the responsibility to handle this to the application.
+%
+\mEdhoc{} itself has limited functionality, few negotiable parameters and
+processing rules
+%
+Hence, we argue in this section that the attack surface
+is small from a DoS perspective.
+%
+However, \mEdhoc{} leaves much of the semantics of its messages undefined.
+%
+This increases the risk of applications vulnerable to DoS even if \mEdhoc{} is
+arguably not vulnerable to DoS itself.
+%
+
+Section 8.7 of the \mEdhoc{} specification explains the design philosophy w.r.t.
+DoS in two paragraphs and gives two recommendations.
+%
+The first being that mitigation of DoS based on sending proper messages should
+be handled by lower layers, e.g., by checking reachability of the sending
+party\footnote{Karl: this may be another way to perform reflection DoS attacks}.
+%
+The second being that an application may try to determine (in some way) that an
+apparently valid message is in fact probably a forgery and should be ignored or
+cause processing to stop.
+%
+
+%-------------------------------------------------------------------------- sec
 \section{\uppercase{Discussion}}
 \label{sec:discussion}
 There are a few places where \mEdhoc{} can be improved,
