@@ -259,6 +259,7 @@ successfully analyze the protocol are required when working with this tool.
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Denial of Service}}
 \label{sec:dos}
+\mPoint{DoS is out of scope for \mEdhoc{}; apps to deal with it}
 \mEdhoc{} includes no specific measures for countering Denial of Service (DoS)
 attacks and delegates the responsibility to handle this to the application.
 %
@@ -274,6 +275,7 @@ This increases the risk of applications vulnerable to DoS even if \mEdhoc{} is
 arguably not vulnerable to DoS itself.
 %
 
+\mPoint{\mEdhoc{} gives a little info of questionable use for developers}
 Section 8.7 of the \mEdhoc{} specification explains the design philosophy w.r.t.
 DoS in two paragraphs and gives two recommendations.
 %
@@ -284,6 +286,113 @@ party\footnote{Karl: this may be another way to perform reflection DoS attacks}.
 The second being that an application may try to determine (in some way) that an
 apparently valid message is in fact probably a forgery and should be ignored or
 cause processing to stop.
+%
+
+\mPoint{Responder is more vulnerable than initiator}.
+For the same reasons as given in the IKEv2 DDoS analysis
+by Nir and Smyslov~\cite{rfc8019} the responder is more vulnerable than the
+initiator.
+%
+From a roles and message passing perspective, IKEv2 is very similar to all
+methods in \mEdhoc{}.
+%
+The RFC provides much good advice for protocols with this structure that
+\mEdhoc{} using applications can reuse.
+%
+We should look more into this.
+%
+
+\mPoint{Amplification}
+An adversary can fill a message 1 with easily generated bogus data and send this
+to a victim responder.
+%
+There is little work for the initiator, but both symmetric and asymmetric key
+operations required by the responder.
+%
+\mEdhoc{} does not protect against this, but refer to the application and its
+transport layer to resolve the problem.
+%
+This is a design decision, see Section 8.7 of \mEdhoc{} specification.
+%
+In addition to the computational resources the responder spends, it may also
+need to obtain certificate chains and verify certificate revocation servers as a
+result of the spoofed message.
+%
+The asymmetry between the adversaries effort and the responder may hence be
+significant.
+%
+Since \mEdhoc{} specifically targets constrained devices this asymmetry needs to
+be considered even more carefully than for IKEv2~\cite{rfc8019}.
+%
+
+Recommend that the role of responder is chosen carefully.
+%
+The responder is most vulnerable.
+%
+For example, is it better that a lock or one of the key cards takes on the
+responder role and becomes vulnerable?
+%
+
+
+\mPoint{Reflection Attacks}
+Reflection attacks are attacks where an adversary spoofs the source address of a
+victim in a message and thereby tricks the responder to send a message to the
+victim.
+%
+\mEdhoc{} leaves protection against this to the transport protocol and
+application, and suggests using a path reachability method similar to IKEv2.
+%
+In situations where the responder does not need to perform additional
+communications to verify certificates or similar, a reachability mechanism may
+be more expensive than performing the computations.
+\footnote{Find ref of that computation is often cheaper than radio
+transmission, at least energy-wise.}
+%
+However, if round-trip times are large, and half-open states hence are kept
+by the receiver for a long time, a reachability mechanism can trade
+communication for storage.
+\footnote{RFC8019 discuss some numbers as examples of tradeoffs. Should we set
+up a simple model and derive an expression for trade-offs? Could be useful for
+implementors to consider, but low academic value. This would capture also
+amplification.}
+%
+
+\mPoint{In a constrained device randomness may be easily depleted}
+Assume an adversary generate (deterministic) bogus message 1s and send these at
+a sufficiently high rate to the responder.
+%
+\mEdhoc{} specifically targets constrained devices, that presumably may not
+always have good randomness sources.
+%
+Is it possible to deplete or significantly reduce the entropy of the source and
+in this way be able to predict the responder's random input to other sessions
+(with other initiators)?
+%
+The LAKE WG have been talking about effects of poor randomness on signatures, so
+this should be an issue, no?
+%
+
+\mPoint{\mEdhoc{} can deadlock if not used correctly}
+An adversary may send forged error messages, and specifically reject proposed
+ciphersuites.
+%
+The initiator is recommended to not try that ciphersuite with the responder
+again in a new session for a while.
+%
+If the adversary rejects all options for a initiator this way, it can prevent
+communication between the initiator and that responder until the cache is
+cleared.
+%
+Potentially, an adversary could lock a party of a group out of communication all
+together this way.
+%
+This needs to be considered by applications.
+%
+
+
+\mPoint{Is any of the methods better than the others from a DoS perspective?}
+We considered this for quite some time, but there seems to be little difference
+in this regard.
 %
 
 %-------------------------------------------------------------------------- sec
