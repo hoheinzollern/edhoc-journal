@@ -21,3 +21,42 @@
 * Diff with latest version
   https://tools.ietf.org/tools/rfcdiff/rfcdiff.pyht?url1=https://www.ietf.org/archive/id/draft-ietf-lake-edhoc-05.txt&url2=https://www.ietf.org/archive/id/draft-ietf-lake-edhoc-13.txt
 
+Ale: changes between docs, in particular discuss the changes to the 4th message
+SAPIC+ stuff
+
+** Changes
+   - Section 3.3. discusses connection identifiers. An optimization is
+     introduced to allow connection identifiers that are one byte
+     long: instead of using CBOR strings - where only the empty string
+     occupies one byte - certain connection identifiers can be
+     represented using integers. In particular the range -24 .. 23 is
+     used - which in CBOR notation occupies one byte - to represent
+     the strings h'00' to h'17' and h'20' to h'37'.
+
+   - Section 3.4.1.  Use of Connection Identifiers for EDHOC Message Correlation
+     removes the corr variable and discusses how CoAP can be used for message
+     correlation, leaving the case where the transport layer does not offer
+     message correlation to Appendix H. In case of no correlation the connection
+     identifiers C_I and C_R can be used for that purpose.  Discusses
+     applications of different ciphersuites, e.g. AES-CCM for constrained
+     devices.
+
+   - Section 3.8 aux data specifies how aux data should be endoded ( with a pair
+     ead_label, ead_value)
+
+   - Section 3.9 added application profiles
+
+   - 4.1.2 def of expand has changed.
+
+   - 4.2.1 edhoc exporter defines an interface for key derivation
+
+   - 4.2.2 edhoc keyupdate provides forward secrecy, better description
+
+   - 5.2 method Corr to method
+
+   - 5.2.2 ciphersuite negotiation revisited -> check if it follows our recommendation
+
+   - 5.3.2 gyciphertext2 fields changed order
+
+   - 5.3.3 padding discarded if necessary
+     Explicit reference to authenticate cred r to application, and send ead2 to app
