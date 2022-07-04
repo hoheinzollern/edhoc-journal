@@ -11,7 +11,7 @@ define(m4STATER2, <!StR2_!>m4METHODIR)
 define(m4EMPTYSTR, <!'e'!>)
 
 begin
-builtins: diffie-hellman, xor, signing, hashing
+builtins: diffie-hellman, xor, signing, hashing, symmetric-encryption
 
 /* WoW: Naming conventions:
  *  - camelCase for functions and properties
@@ -97,12 +97,7 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
          )
          plainText2 = <$V, authV>
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
-         /* K_2e is split in two parts to allow attacker to attack them
-          * individually
-          */
-         K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
-         K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
-         CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
+         CIPHERTEXT_2 = senc{plainText2}K_2e
         !>
 )
          m2 = <data_2, CIPHERTEXT_2>
@@ -185,13 +180,9 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
              prk_3e2m = extr(prk_2e, grx)!>
              ,
             <!prk_3e2m = prk_2e!>
-         )
-         /* K_2e is split in two parts to allow attacker to attack them
-          * individually
-          */
-         K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
-         K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
-         CIPHERTEXT_2 = <$V XOR K_2e_1, authR XOR K_2e_2>
+         ) 
+         K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
+         CIPHERTEXT_2 = senc{plainText2}K_2e
          m2 = <data_2, CIPHERTEXT_2>
 
          K_2m = expa(<$cAEAD0, TH_2, 'K_2m'>, prk_3e2m)
