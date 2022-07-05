@@ -259,94 +259,120 @@ successfully analyze the protocol are required when working with this tool.
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Denial of Service}}
 \label{sec:dos}
-\mPoint{DoS is out of scope for \mEdhoc{}; apps to deal with it}
+%\mPoint{DoS is out of scope for \mEdhoc{}; apps to deal with it}
 \mEdhoc{} includes no specific measures for countering Denial of Service (DoS)
 attacks and delegates the responsibility to handle this to the application.
 %
 \mEdhoc{} itself has limited functionality, few negotiable parameters and
-processing rules
+processing rules.
 %
-Hence, we argue in this section that the attack surface
-is small from a DoS perspective.
+Hence, we argue in this section that its attack surface
+is limited from a DoS perspective.
 %
 However, \mEdhoc{} leaves much of the semantics of its messages undefined.
 %
-This increases the risk of applications vulnerable to DoS even if \mEdhoc{} is
-arguably not vulnerable to DoS itself.
+This increases the risk of applications vulnerable to DoS via \mEdhoc{}, even
+though \mEdhoc{} itself is arguably not particularly weak in this respect.
 %
 
-\mPoint{\mEdhoc{} gives a little info of questionable use for developers}
-Section 8.7 of the \mEdhoc{} specification explains the design philosophy w.r.t.
+\paragraph{DoS mitigation is left to developers.}
+Section 8.7 of the \mEdhoc{} specification\footnote{draft-ietf-lake-edhoc-14}
+explains the design philosophy w.r.t.
 DoS in two paragraphs and gives two recommendations.
 %
-The first being that mitigation of DoS based on sending proper messages should
-be handled by lower layers, e.g., by checking reachability of the sending
-party\footnote{Karl: this may be another way to perform reflection DoS attacks}.
+The first being that \mEdhoc{} relies on lower layers to mitigate DoS, and an
+example of DoS countermeasures is given: checking return routeability when
+receiving the first message.
 %
 The second being that an application may try to determine (in some way) that an
 apparently valid message is in fact probably a forgery and should be ignored or
 cause processing to stop.
 %
 
-\mPoint{Responder is more vulnerable than initiator}.
-For the same reasons as given in the IKEv2 DDoS analysis
-by Nir and Smyslov~\cite{rfc8019} the responder is more vulnerable than the
-initiator.
+No recommendation is given on how to minimize DoS effects stemming from use of
+error messages, which can be used in an arbitrary way in \mEdhoc{}.
 %
-From a roles and message passing perspective, IKEv2 is very similar to all
-methods in \mEdhoc{}.
-%
-The RFC provides much good advice for protocols with this structure that
-\mEdhoc{} using applications can reuse.
-%
-We should look more into this.
+We now elaborate on some considerations application developers needs to take
+into account.
 %
 
-\mPoint{Amplification}
-An adversary can fill a message 1 with easily generated bogus data and send this
-to a victim responder.
+
+\paragraph{Amplification and asymmetry.}
+For the same reasons as given in the IKEv2 DDoS analysis
+by~\cite{rfc8019} the responder is more vulnerable than the
+initiator.
 %
-There is little work for the initiator, but both symmetric and asymmetric key
-operations required by the responder.
+The key similarity between IKEv2 and \mEdhoc{} here is that the initiator is
+anonymous in the first message and that creating the first message is
+computationally cheap and requires no storage.
 %
-\mEdhoc{} does not protect against this, but refer to the application and its
-transport layer to resolve the problem.
+No element in the first \mEdhoc{} message can be verified by the receiver as
+being legitimate as long as the format is correct and elliptic curve points
+lie on the proposed curve.
 %
-This is a design decision, see Section 8.7 of \mEdhoc{} specification.
+\mEdhoc{} leave it to the application and its
+transport layer to resolve any issues.
 %
-In addition to the computational resources the responder spends, it may also
-need to obtain certificate chains and verify certificate revocation servers as a
-result of the spoofed message.
+In addition to the computational resources the responder spends, communication
+patterns in the underlying protocols may require the responder to
+obtain and verify certificate chains, and verify
+certificate-revocation servers as a result of the spoofed initial message.
 %
-The asymmetry between the adversaries effort and the responder may hence be
+For example, the content of the \mADone{} information element may hint the
+responder to take further actions.
+%
+
+The asymmetry between the adversary's effort and the responder's may hence be
 significant.
 %
 Since \mEdhoc{} specifically targets constrained devices this asymmetry needs to
 be considered even more carefully than for IKEv2~\cite{rfc8019}.
 %
 
-Recommend that the role of responder is chosen carefully.
+Depending on the use case, the first \mEdhoc{} message may be sent by either
+party in a session.
 %
-The responder is most vulnerable.
+For example, even though it may seem intuitive that an electronic
+key-card initiates the connection towards lock, the first \mEdhoc{} message
+could be included in the response from the lock.
 %
-For example, is it better that a lock or one of the key cards takes on the
-responder role and becomes vulnerable?
+This means the lock can postpone heavy verification actions until it has
+authenticated the key card after receiving the third \mEdhoc{} message.
 %
 
+Implementers are well advised to consult \cite{rfc8019}, which provides much
+good general information about DoS for protocols with this structure.
+%
+However, ultimately, a product-specific risk assessment is required to
+determine appropriate DDoS mitigations.
+%
 
-\mPoint{Reflection Attacks}
+\paragraph{Reflection Attacks}
 Reflection attacks are attacks where an adversary spoofs the source address of a
 victim in a message and thereby tricks the responder to send a message to the
 victim.
 %
 \mEdhoc{} leaves protection against this to the transport protocol and
-application, and suggests using a path reachability method similar to IKEv2.
+application, and suggests using a return path reachability method similar to IKEv2.
 %
+We note that such reachability mechanisms can easily be used to make a responder
+send reachability requests to arbitrary addressable targets.
+%
+Depending on the design of such reachability mechanisms, they may require that
+unsolicited reachability requests are discarded, limiting the effects of
+anonymous DoS attacks like these.
+%
+
 In situations where the responder does not need to perform additional
 communications to verify certificates or similar, a reachability mechanism may
-be more expensive than performing the computations.
-\footnote{Find ref of that computation is often cheaper than radio
-transmission, at least energy-wise.}
+be more expensive in terms of time and storage compared to continue with the
+protocol and keeping a half-open state for a period of time.
+%
+Doing so would also avoid creating secondary DoS effects on certificate storage
+nodes or certificate revocation servers.
+%
+The latter may cause a systems-level issue if many distributed
+\mEdhoc{} responders frequently requests such servers.
 %
 However, if round-trip times are large, and half-open states hence are kept
 by the receiver for a long time, a reachability mechanism can trade
@@ -389,10 +415,9 @@ together this way.
 This needs to be considered by applications.
 %
 
-
-\mPoint{Is any of the methods better than the others from a DoS perspective?}
-We considered this for quite some time, but there seems to be little difference
-in this regard.
+While we have not conducted a formal analysis of the fact, the structure of all
+methods are so similar that it seems plausible that none of them would be
+stronger against DDoS than the others.
 %
 
 %-------------------------------------------------------------------------- sec
