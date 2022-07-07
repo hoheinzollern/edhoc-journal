@@ -433,6 +433,65 @@ However, ultimately, a product-specific risk assessment is required to
 determine appropriate DDoS mitigations.
 %
 
+%-------------------------------------------------------------------------- sec
+\section{\uppercase{Error handling}}
+\label{sec:errorHandling}
+\mPoint{Error handling is undefined except for algo negotiation}
+Section 6 of the \mEdhoc{} specification\footnote{draft-ietf-lake-edhoc-14}
+states that error messages can be sent at any time and by any party.
+%
+One error message type is defined (for algorithm negotiation), and the rest can
+be arbitrarily defined by the implementation.
+%
+The contents and semantics of these messages are also implementation defined.
+%
+Consequently, the error messages provide a generic message passing mechanism.
+%
+
+\textbf{Q:} Is htere any situation where it makes sense that the initiator sends
+a unsupported ciphersuite message instead of message 3?
+%
+
+\textbf{Q:} In Section H: if no message correlation support by the transport
+layer, \mCi{} and \mCr{} should be used for correlation of messages to a
+session.
+%
+Error messages do not carry \mCi{} or \mCr{}; will this create a problem?
+%
+
+\mEdhoc{} provides the error message mechanism, but gives little to no guidance
+on how it should be used safely.
+%
+Example of issue with improper use: Assume application logs error messages a
+finite log with log rotation.
+%
+If the log is used for anomaly detection or detection of sensitive events, then
+an adversary can simply inject error messages and fill the log until the
+sensitive event is overwritten.
+%
+If the filling error messages are less suspicious than the actual attack, this
+may be beneficial for the adversary.
+%
+Implementors should do proper log-separation and log management.
+%
+
+Section 6.2 gives an excample of sending an error message "method not
+supported".
+%
+This message cannot be used to negotiate method securely.
+%
+The reason is that error messages are not integrity protected, and an initator
+only proposes one method, and therefore the same tactic used for ciphersuite
+negotiation cannot be used for methods.
+%
+Because method negotiation can be viewed in the context of crypto agility, there
+is room for improvement.
+%
+
+
+
+
+%-------------------------------------------------------------------------- sub
 \section{\uppercase{Discussion}}
 \label{sec:discussion}
 There are a few places where \mEdhoc{} can be improved,
