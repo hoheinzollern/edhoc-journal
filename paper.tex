@@ -263,13 +263,20 @@ successfully analyze the protocol are required when working with this tool.
 \mEdhoc{} includes no specific measures for countering Denial of Service (DoS)
 attacks and delegates the responsibility to handle this to the application.
 %
-\mEdhoc{} itself has limited functionality, few negotiable parameters and
-processing rules.
+The core \mEdhoc{} specification has limited functionality, few negotiable
+parameters and processing rules.
 %
 Hence, we argue in this section that its attack surface
 is limited from a DoS perspective.
 %
-However, \mEdhoc{} leaves much of the semantics of its messages undefined.
+However, \mEdhoc{} leaves much of the semantics of its messages undefined or
+specified as (optional) extensions.
+%
+It is therefore difficult to draw the line between what is \mEdhoc{} and what is
+an extension.
+%
+For example, the core specification does not include a
+message transport mechanism.
 %
 This increases the risk of applications vulnerable to DoS via \mEdhoc{}, even
 though \mEdhoc{} itself is arguably not particularly weak in this respect.
@@ -292,12 +299,16 @@ cause processing to stop.
 No recommendation is given on how to minimize DoS effects stemming from use of
 error messages, which can be used in an arbitrary way in \mEdhoc{}.
 %
+While there is some work on DDoS aspects of \mCoap{}, and much on IoT in
+general, this does not capture the particular consequences originating with
+\mEdhoc{}.
+%
 We now elaborate on some considerations application developers needs to take
 into account.
 %
 
 
-\paragraph{Amplification and asymmetry.}
+\paragraph{Amplification and role asymmetry.}
 For the same reasons as given in the IKEv2 DDoS analysis
 by~\cite{rfc8019} the responder is more vulnerable than the
 initiator.
@@ -313,8 +324,8 @@ lie on the proposed curve.
 \mEdhoc{} leave it to the application and its
 transport layer to resolve any issues.
 %
-In addition to the computational resources the responder spends, communication
-patterns in the underlying protocols may require the responder to
+In addition to the computational resources the responder spends, \mEdhoc{}
+execution may require the responder to
 obtain and verify certificate chains, and verify
 certificate-revocation servers as a result of the spoofed initial message.
 %
@@ -340,14 +351,7 @@ This means the lock can postpone heavy verification actions until it has
 authenticated the key card after receiving the third \mEdhoc{} message.
 %
 
-Implementers are well advised to consult \cite{rfc8019}, which provides much
-good general information about DoS for protocols with this structure.
-%
-However, ultimately, a product-specific risk assessment is required to
-determine appropriate DDoS mitigations.
-%
-
-\paragraph{Reflection Attacks}
+\paragraph{Reflection Attacks.}
 Reflection attacks are attacks where an adversary spoofs the source address of a
 victim in a message and thereby tricks the responder to send a message to the
 victim.
@@ -383,22 +387,23 @@ implementors to consider, but low academic value. This would capture also
 amplification.}
 %
 
-\mPoint{In a constrained device randomness may be easily depleted}
-Assume an adversary generate (deterministic) bogus message 1s and send these at
-a sufficiently high rate to the responder.
-%
-\mEdhoc{} specifically targets constrained devices, that presumably may not
-always have good randomness sources.
-%
-Is it possible to deplete or significantly reduce the entropy of the source and
-in this way be able to predict the responder's random input to other sessions
-(with other initiators)?
-%
-The LAKE WG have been talking about effects of poor randomness on signatures, so
-this should be an issue, no?
-%
+%\mPoint{In a constrained device randomness may be easily depleted}
+%Assume an adversary generate (deterministic) bogus message 1s and send these at
+%a sufficiently high rate to the responder.
+%%
+%\mEdhoc{} specifically targets constrained devices, that presumably may not
+%always have good randomness sources.
+%%
+%Is it possible to deplete or significantly reduce the entropy of the source and
+%in this way be able to predict the responder's random input to other sessions
+%(with other initiators)?
+%%
+%The LAKE WG have been talking about effects of poor randomness on signatures, so
+%this should be an issue, no?
+%%
 
 \mPoint{\mEdhoc{} can deadlock if not used correctly}
+
 An adversary may send forged error messages, and specifically reject proposed
 ciphersuites.
 %
@@ -420,7 +425,14 @@ methods are so similar that it seems plausible that none of them would be
 stronger against DDoS than the others.
 %
 
-%-------------------------------------------------------------------------- sec
+Implementers are well advised to consult \cite{rfc8019}, which provides much
+good general information about DoS for key establishment
+protocols with the 3-message structure employed by \mEdhoc{}.
+%
+However, ultimately, a product-specific risk assessment is required to
+determine appropriate DDoS mitigations.
+%
+
 \section{\uppercase{Discussion}}
 \label{sec:discussion}
 There are a few places where \mEdhoc{} can be improved,
