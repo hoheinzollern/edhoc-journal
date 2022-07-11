@@ -51,10 +51,10 @@ TIME=/usr/bin/time -f ${TIMEFMT}
 
 # Don't change the METH string or the LEMMAPREFIX strings. They are used
 # as variables in substitutions below
-TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) > ${PROOFS}/LEMMAPREFIX-METH 2>&1;
+TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) 2>&1 | gzip > ${PROOFS}/LEMMAPREFIX-METH.gz ;
 
 check:
-	grep --color=auto -E "verified|falsified|Killed|(user.*m.*s)" ${PROOFS}/*
+	zgrep --color=auto -E "verified|falsified|Killed|(user.*m.*s)" ${PROOFS}/*
 
 proofdir:
 	mkdir -p proofs
