@@ -53,6 +53,9 @@ TIME=/usr/bin/time -f ${TIMEFMT}
 # as variables in substitutions below
 TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) 2>&1 | gzip > ${PROOFS}/LEMMAPREFIX-METH.gz ;
 
+# Use this to discard all proofs and only see the results
+#TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) 2>/dev/null | gzip > ${PROOFS}/LEMMAPREFIX-METH.gz ;
+
 check:
 	zgrep --color=auto -E "verified|falsified|Killed|(user.*m.*s)" ${PROOFS}/*
 
