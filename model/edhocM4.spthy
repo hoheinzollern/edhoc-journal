@@ -408,20 +408,20 @@ rule revealLTK_PSK:
     [!LTK_PSK(<$A, $B>, ~ltk)] --[LTKRev($A), LTKRev($B)]-> [Out(~ltk)]
 
 /* PCS interface */
-/*
+
 ifelse(ifelse(<!SIG!>, m4METHODI, 1, ifelse(<!SIG!>, m4METHODR, 1, 0)), 1,
 <!rule forge_SIG:
     [!LTK_SIG($A, ~ltk), In(xx)] --[TEE($A)]-> [Out(sign(xx, ~ltk))]!>
 )
 ifelse(ifelse(<!STAT!>, m4METHODI, 1, ifelse(<!STAT!>, m4METHODR, 1, 0)), 1,
 <!rule exp_STAT:
-    [!LTK_STAT($A, ~ltk), In('g'^x)] --[TEE($A)]-> [Out(('g'^x)^~ltk)]!>
+    [!LTK_STAT($A, ~ltk), In('g'^~x)] --[TEE($A)]-> [Out(('g'^~x)^~ltk)]!>
 )
 ifelse(<!PSK!>, m4METHODI,
 <!rule forge_PSK:
     [!LTK_PSK(<$A, $B>, ~ltk), In(xx)] --[TEE($A), TEE($B)]-> [Out(extr(~ltk, xx))]!>
 )
-*/
+
 
 rule revealEphKey:
     [CompletedRevEph(~tid, u, v, sk, ~eph)] --[EphKeyRev(sk)]-> [Out(~eph)]
@@ -544,6 +544,7 @@ lemma authInjAgreeGuaranteeForI:
                      ExpCommitI(tidIp, up, vp, expSk, agreed)@t1p ==> #t1p = #t2)
               )
             | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
+	    | (Ex #k. TEE(v)@k)
             )
         )
     "
@@ -558,6 +559,7 @@ lemma authInjAgreeGuaranteeForR:
                      CommitR(tidRp, up, vp, sk, agreed)@t1p ==> #t1p = #t2)
                )
              | (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
+	     | (Ex #k. TEE(u)@k)
              )
          )
     "
@@ -610,8 +612,8 @@ lemma authImplicitAuthGuaranteeForI:
                 CommitI(tidIp,  up,  vp,  sk, agreedp)@t1p ==> (#t1p = #t1)
              )
            )
-         | (Ex #t0. LTKRev(v)@t0 & #t0 < #t1) //| (Ex #k. TEE(v)@k)
-         | (Ex #t0. EphKeyRev(sk)@t0) //| (Ex #k. TEE(v)@k)
+         | (Ex #t0. LTKRev(v)@t0 & #t0 < #t1)// | (Ex #k. TEE(u)@k)
+         | (Ex #t0. EphKeyRev(sk)@t0) | (Ex #k. TEE(v)@k)
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
     "
@@ -628,8 +630,8 @@ lemma authImplicitAuthGuaranteeForR:
                 CommitR(tidRp,  up,  vp,  sk, agreedp)@t1p ==> (#t1p = #t1)
              )
            )
-         | (Ex #t0. LTKRev(u)@t0 & #t0 < #t1) //| (Ex #k. TEE(u)@k)
-         | (Ex #t0. EphKeyRev(sk)@t0) //| (Ex #k. TEE(v)@k)
+         | (Ex #t0. LTKRev(u)@t0 & #t0 < #t1) | (Ex #k. TEE(u)@k)
+         | (Ex #t0. EphKeyRev(sk)@t0)// | (Ex #k. TEE(v)@k)
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
     "
@@ -651,7 +653,8 @@ lemma secrecyPFS:
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
-       // | (Ex w #l. TEE(w)@l)
+       | (Ex #l. TEE(u)@l)
+       | (Ex #l. TEE(v)@l)
        )
     "
 
@@ -668,6 +671,8 @@ ifdef(<!m4AD3!>,
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
+       | (Ex #k. TEE(u)@k)
+       | (Ex #k. TEE(v)@k)
        )
     )
     &
@@ -678,6 +683,8 @@ ifdef(<!m4AD3!>,
              | (Ex #t2. LTKRev(v)@t2 & #t2 < #t3)
              | (Ex #t2. EphKeyRev(sk)@t2)
 //             | (Ex #t2. SessKeyRev(sk)@t2)
+             | (Ex #k. TEE(u)@k)
+             | (Ex #k. TEE(v)@k)
            )
        )
     )
