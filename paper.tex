@@ -78,27 +78,64 @@ Here, we build on this work, and use \mTamarin{} to formally analyze the key est
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Denial of Service}}
 \label{sec:dos}
-%\mPoint{DoS is out of scope for \mEdhoc{}; apps to deal with it}
-\mEdhoc{} includes no specific measures for countering Denial of Service (DoS)
-attacks and delegates the responsibility to handle this to the application.
+
+% There is little about EDHOC specific DoS stuff; that is interesting in itself,
+% and motivates this section
+There is a wealth of information about DoS in general, and more specifically for
+IoT.
 %
-The core \mEdhoc{} specification has limited functionality, few negotiable
+However, there is little information regarding DoS aspects stemming
+specifically from \mEdhoc{}.
+%
+
+% Other protocols have DoS considerations, but EDHOC delegates it to developer
+In contrast to \mTls{} and IKEv2,
+the \mEdhoc{} core specification does not include any specific measures for
+countering Denial of Service (DoS) attacks.
+%
+Instead, that responsibility is delegated to the application, using
+proprietary measures or extensions to \mEdhoc{}.
+%
+
+% The core is small and probably not vulnerable to anything unexpected
+The \mEdhoc{} core specification has limited functionality, few negotiable
 parameters and processing rules.
 %
 Hence, we argue in this section that its attack surface
 is limited from a DoS perspective.
 %
+
+% However, It is difficult to define what EDHOC *is*; it s partially specified in many
+% specs
 However, \mEdhoc{} leaves much of the semantics of its messages undefined or
-specified as (optional) extensions.
+specified as extensions.
 %
-It is therefore difficult to draw the line between what is \mEdhoc{} and what is
-an extension.
+Examples of mechanisms with mostly undefined semantics include processing
+rules and content of error messages and of the additional data that is
+passed in each of the \mEdhoc{} messages.
 %
-For example, the core specification does not include a
+Another example is that the core specification does not include a
 message transport mechanism.
 %
-This increases the risk of applications vulnerable to DoS via \mEdhoc{}, even
-though \mEdhoc{} itself is arguably not particularly weak in this respect.
+The transport for \mEdhoc's primary target, i.e., to key \mOscore{},
+is \mCoap{}.
+%
+This is specified in~\cite{ietf-core-oscore-edhoc-03}, but still leaves
+many design choices to the application.
+%
+Because of this, it is difficult to draw the line between what is considered as
+\mEdhoc{} and what is an extension.
+%
+
+% Pros with undefined semantics: flexibilty; Cons: developers can shoot
+% themselves in the foot
+Undefined semantics allow the implementors much freedom
+and flexibility to design applications.
+%
+On the down-side, the few recommendations given increase the risk of
+applications being vulnerable to DoS via \mEdhoc{}, even
+though the core \mEdhoc{} specification itself is arguably not particularly
+weak in this respect.
 %
 
 \paragraph{DoS mitigation is left to developers.}
@@ -116,7 +153,8 @@ cause processing to stop.
 %
 
 No recommendation is given on how to minimize DoS effects stemming from use of
-error messages, which can be used in an arbitrary way in \mEdhoc{}.
+error messages, which can be used in an arbitrary way in \mEdhoc{}
+(see Section~\ref{sec:errorHandling} below).
 %
 While there is some work on DDoS aspects of \mCoap{}, and much on IoT in
 general, this does not capture the particular consequences originating with
@@ -168,6 +206,12 @@ could be included in the response from the lock.
 %
 This means the lock can postpone heavy verification actions until it has
 authenticated the key card after receiving the third \mEdhoc{} message.
+%
+The draft IETF specification profiling \mEdhoc{} for use with
+\mCoap{} and \mOscore{} ~\cite{ietf-core-oscore-edhoc-03},
+however, defines the
+\mCoap{} client to be the \mEdhoc{} initiator, and hence reduces the flexibility
+to use that option.
 %
 
 \paragraph{Reflection Attacks.}
@@ -267,7 +311,7 @@ The contents and semantics of these messages are also implementation defined.
 Consequently, the error messages provide a generic message passing mechanism.
 %
 
-\textbf{Q:} Is htere any situation where it makes sense that the initiator sends
+\textbf{Q:} Is there any situation where it makes sense that the initiator sends
 a unsupported ciphersuite message instead of message 3?
 %
 
@@ -294,7 +338,7 @@ may be beneficial for the adversary.
 Implementors should do proper log-separation and log management.
 %
 
-Section 6.2 gives an excample of sending an error message "method not
+Section 6.2 gives an example of sending an error message "method not
 supported".
 %
 This message cannot be used to negotiate method securely.
