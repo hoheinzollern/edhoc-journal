@@ -272,7 +272,7 @@ ifdef(<!m4AD3!>,
           , ExpRunningI(~tid, $U, $V, exp_sk, agreed)  // Sugar for standard running/commit
           , RunningI(~tid, $U, $V, imp_sk, agreed)  // Sugar for standard running/commit
           , I3(~tid, $U, $V, m1, m2, m3)
-          , CompletedRun($U, $V, imp_sk)    // for clearer statement of PFS - secrecy only
+          , CompletedRun($U, $V, imp_sk, ~tid)    // for clearer statement of PFS - secrecy only
 ifelse(<!SIG!>, m4METHODR,
          <!, Eq(verify(authR, <assocData2, MAC_2>, CRED_V), true)!>,
          <!ifelse(<!STAT!>, m4METHODR,
@@ -281,7 +281,7 @@ ifelse(<!SIG!>, m4METHODR,
          )!>
 )
 ifdef(<!m4AD3!>,
-        <!, Send($U, $V, imp_sk, ~AD_3)!>
+        <!, Send($U, $V, imp_sk, ~AD_3, ~tid)!>
 )
           ]->
         [ CompletedRevEph(~tid, $U, $V, imp_sk, ~xx)
@@ -367,7 +367,7 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
         --[ ExpCommitR(~tid, u, $V, exp_sk, agreed)
           , CommitR(~tid, u, $V, imp_sk, agreed)
           , R4(~tid, u, $V, m1, m2, m3)
-          , CompletedRun(u, $V, imp_sk) // For clearer statement of PFS -- secrecy only
+          , CompletedRun(u, $V, imp_sk, ~tid) // For clearer statement of PFS -- secrecy only
 ifelse(<!SIG!>, m4METHODI,
          <!, Eq(verify(authI, <assocData3, MAC_3>, CRED_U), true)!>,
          <!ifelse(<!STAT!>, m4METHODI,
@@ -376,7 +376,7 @@ ifelse(<!SIG!>, m4METHODI,
          )!>
 )
 ifdef(<!m4AD3!>,
-        <!, Recv(u, $V, imp_sk, AD_3)!>
+        <!, Recv(u, $V, imp_sk, AD_3, ~tid)!>
 )
           ]->
         [ CompletedRevEph(~tid, u, $V, imp_sk, ~yy) ]
@@ -463,15 +463,20 @@ lemma sanityLTKRev:
     exists-trace
     "Ex u #i. LTKRev(u)@i"
 
+lemma sanityTEE:
+    exists-trace
+    "Ex u #i. TEE(u)@i"
+
+
 /*
  * Additional validation lemmas
  */
 lemma validAuthDifferentKeysPosssible:
     exists-trace
     /* Same parties: Possible to have runs resulting in different keys */
-    "(Ex u v sk1 sk2 #i #j.
-         ( CompletedRun(u, v, sk1)@i
-         & CompletedRun(u, v, sk2)@j
+    "(Ex u v sk1 sk2 tid1 tid2 #i #j.
+         ( CompletedRun(u, v, sk1, tid1)@i
+         & CompletedRun(u, v, sk2, tid2)@j
          & not(sk1 = sk2)
          )
      )
@@ -480,9 +485,9 @@ lemma validAuthDifferentKeysPosssible:
 lemma validAuthDifferentKeysPosssible2:
     exists-trace
       /* Different parties: Possible to have runs resulting in different keys */
-    "(Ex u1 v1 u2 v2 sk1 sk2 #i #j.
-         ( CompletedRun(u1, v1, sk1)@i
-         & CompletedRun(u2, v2, sk2)@j
+    "(Ex u1 v1 u2 v2 sk1 sk2 tid1 tid2 #i #j.
+         ( CompletedRun(u1, v1, sk1, tid1)@i
+         & CompletedRun(u2, v2, sk2, tid2)@j
          & not(sk1 = sk2)
          & not(u1 = u2)
          & not(v1 = v2)
@@ -493,9 +498,9 @@ lemma validAuthDifferentKeysPosssible2:
 lemma validAuthDifferentPartiesSameKey:
     exists-trace
     /* Two different threads with different parties */
-    "(Ex u v sk #i #j.
-         ( CompletedRun(u, v, sk)@i
-         & CompletedRun(u, v, sk)@j
+    "(Ex u v sk tidI tidR #i #j.
+         ( CompletedRun(u, v, sk, tidI)@i
+         & CompletedRun(u, v, sk, tidR)@j
          & not(u = v)
          )
      )
@@ -504,9 +509,9 @@ lemma validAuthDifferentPartiesSameKey:
 lemma validAuthDifferentPartiesSameKey2:
     exists-trace
      /* Same party authenticates itself */
-     "(Ex u sk #i #j.
-         ( CompletedRun(u, u, sk)@i
-         & CompletedRun(u, u, sk)@j
+     "(Ex u sk tidI tidR #i #j.
+         ( CompletedRun(u, u, sk, tidI)@i
+         & CompletedRun(u, u, sk, tidR)@j
          & not(#i = #j)
          )
      )
@@ -544,7 +549,7 @@ lemma authInjAgreeGuaranteeForI:
                      ExpCommitI(tidIp, up, vp, expSk, agreed)@t1p ==> #t1p = #t2)
               )
             | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
-	    | (All m1 #t1. I1(tidI, u, v, m1)@t1 ==> Ex #k. TEE(v)@k & t1 < k)
+	    | (All m1 #t0. I1(tidI, u, v, m1)@t0 ==> Ex #k. TEE(v)@k & (t0 < k | k < t2))
             )
         )
     "
@@ -559,7 +564,7 @@ lemma authInjAgreeGuaranteeForR:
                      CommitR(tidRp, up, vp, sk, agreed)@t1p ==> #t1p = #t2)
                )
              | (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
-             | (All m1 m2 #t1. R2(tidR, v, m1, m2)@t1 ==> Ex #k. TEE(u)@k & t1 < k)
+             | (All m1 m2 #t0. R2(tidR, v, m1, m2)@t0 ==> Ex #k. TEE(u)@k & (t0 < k | k < t2))
              )
          )
     "
@@ -614,7 +619,7 @@ lemma authImplicitAuthGuaranteeForI:
            )
          | (Ex #t0. LTKRev(v)@t0 & #t0 < #t1)
          | (Ex #t0. EphKeyRev(sk)@t0)
-	 | (All m1 #t1. I1(tidI, u, v, m1)@t1 ==> Ex #k. TEE(v)@k & t1 < k)
+	 | (All m1 #t0. I1(tidI, u, v, m1)@t0 ==> Ex #k. TEE(v)@k & (t0 < k | k < t1))
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
     "
@@ -632,7 +637,7 @@ lemma authImplicitAuthGuaranteeForR:
              )
            )
          | (Ex #t0. LTKRev(u)@t0 & #t0 < #t1)
-         | (All m1 m2 #t1. R2(tidR, v, m1, m2)@t1 ==> Ex #k. TEE(u)@k & t1 < k)
+         | (All m1 m2 #t0. R2(tidR, v, m1, m2)@t0 ==> Ex #k. TEE(u)@k & (t0 < k | k < t1))
          | (Ex #t0. EphKeyRev(sk)@t0)
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
@@ -650,13 +655,13 @@ lemma authImplicitAuthGuaranteeForR:
  */
 lemma secrecyPFS:
    all-traces
-   "All u v sk #t3 #t2. (K(sk)@t3 & CompletedRun(u, v, sk)@t2) ==>
+   "All u v sk tid #t3 #t2. (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
-       | (Ex #l. TEE(u)@l)
-       | (Ex #l. TEE(v)@l)
+       | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
+       | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
        )
     "
 
@@ -668,28 +673,28 @@ lemma secrecyPFS:
 ifdef(<!m4AD3!>,
 <!lemma securityAD_3AEAD:
    all-traces
-   "(All ad3 u v sk #t3 #t2. (K(ad3)@t3 & Send(u, v, sk, ad3)@t2) ==>
+   "(All ad3 u v sk tidI #t3 #t2. (K(ad3)@t3 & Send(u, v, sk, ad3, tidI)@t2) ==>
        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
-       | (Ex #k. TEE(u)@k)
-       | (Ex #k. TEE(v)@k)
+       | (Ex #k m1 #t0. TEE(v)@k & I1(tidI, u, v, m1)@t0 & (t0 < k | k < t2))
+       | (Ex #k tidR m1 m2 #t0 #t4. TEE(u)@k & Recv(u, v, sk, ad3, tidR)@t4 & R2(tidR, v, m1, m2)@t0 & (t0 < k | k < t4))
        )
-    )
-    &
-    (All ad3 u v sk #t3.
-       (Recv(u, v, sk, ad3)@t3 ==>
-           ( (Ex #t2. Send(u, v, sk, ad3)@t2 & #t2 < #t3)
+    )"
+lemma securityAD_3AEAD_Integrity:
+   all-traces
+   "(All ad3 u v sk tidR #t3.
+       (Recv(u, v, sk, ad3, tidR)@t3 ==>
+           ( (Ex tidI #t2. Send(u, v, sk, ad3, tidI)@t2 & #t2 < #t3)
              | (Ex #t2. LTKRev(u)@t2 & #t2 < #t3)
              | (Ex #t2. LTKRev(v)@t2 & #t2 < #t3)
              | (Ex #t2. EphKeyRev(sk)@t2)
 //             | (Ex #t2. SessKeyRev(sk)@t2)
-             | (Ex #k. TEE(u)@k)
-             | (Ex #k. TEE(v)@k)
+             | (Ex #k tidI m1 #t0 #t2. TEE(v)@k & Send(u, v, sk, ad3, tidI)@t2 & I1(tidI, u, v, m1)@t0 & (t0 < k | k < t2))
+             | (Ex #k m1 m2 #t0. TEE(u)@k & R2(tidR, v, m1, m2)@t0 & (t0 < k | k < t3))
            )
        )
-    )
-    "
+    )"
 !>)
 end
