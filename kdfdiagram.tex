@@ -1,4 +1,4 @@
-% !TEX root =  edhocProtocol.tex
+% !TEX root =  protocol.tex
 
 \begin{tikzpicture}[%
     >=latex,              % Nice arrows; your taste may be different
@@ -14,7 +14,7 @@
 terminput/.style={rounded corners},
 term/.style={rounded corners},
   base/.style={draw, thick, on chain, on grid, align=center, minimum height=4ex},
-  dhkbox/.style={draw=cbsky, fill=cbsky!25, rectangle},
+  dhkbox/.style={draw=cbgreen, fill=cbgreen!25, rectangle},
   dhk/.style={base, dhkbox},
   prkbox/.style={draw=cborange, fill=cborange!25, rectangle},
   prk/.style={base, prkbox},
@@ -39,8 +39,8 @@ term/.style={rounded corners},
 \node [prk, below=6mm of c1.south] (p3) {\mPRKthree};
 \draw [->, norm] (c1.south) -- (p3.north) node[midway, right] {N};
 
-\node [cond, join, below=8mm of p3.south] (c2) {I uses \mStat?};
-\node [prk, below=5mm of c2.south] (p4) {\mPRKfour};
+\node [cond, join, below=10mm of p3.south] (c2) {I uses \mStat?};
+\node [prk, below=8mm of c2.south] (p4) {\mPRKfour};
 \draw [->, norm] (c2.south) -- (p4.north) node[midway, right] {N};
 
 \node [hkdfext, right=3cm of p3] (h3) {\mHkdfExtract};
@@ -73,11 +73,11 @@ term/.style={rounded corners},
 \draw [->, norm] (p3.south) ++(0,-0.5) -- (h8);
 \draw [->, norm] (h8) -- (k2b);
 \draw [->, norm] (p2) -- (h2); 
-\draw [->, norm] (c1.east) -- ++(1.92,0) -- (h3.north) node[midway,above left] {Y};
+\draw [->, norm] (c1.east) -- ++(1.85,0) -- (h3.north) node[midway,above left] {Y};
 %\draw [->, norm] (h3.south) -- ++(0,-1) -- ++(-3,0);
 \draw [->, norm] (h3.west) -- (p3.east);
 \draw [->, norm] (p3) -- (h4); 
-\draw [->, norm] (c2.east) -- ++(1.99,0) -- (h5.north) node[midway,above left] {Y};
+\draw [->, norm] (c2.east) -- ++(1.91,0) -- (h5.north) node[midway,above left] {Y};
 %\draw [->, norm] (h5.south) -- ++(0,-1) -- ++(-3,0);
 \draw [->, norm] (h5.west) -- (p4.east);
 \draw [->, norm] (p4) -- (h6);
@@ -102,12 +102,12 @@ term/.style={rounded corners},
 \draw [->, dotted, shorten >=1mm] (u5) -- (h4);
 \draw [->, dotted, shorten >=1mm] (u5) -- (h2);
 
-\node [term, above = 0.3cm of h6] (u6) {\mTHthree};
+\node [term, above = 0.5cm of h6] (u6) {\mTHthree};
 \draw [->, dotted, shorten >=1mm] (u6) -- (h6);
 \draw [->, dotted, shorten >=1mm] (u6) -- (h8);
 
 %\node [term, below= 1cm of h9] (u7) {\mTHfour};
-\node [term, below=0.35cm of p4] (u7) {\mTHfour};
+\node [term, below=0.4cm of p4] (u7) {\mTHfour};
 %\draw [->, dotted, shorten >=1mm] (u7) -- (h9.south);
 \draw [-> , dotted ] (u7.west) -- ([yshift=-0.4em] h9.east);
 
