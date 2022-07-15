@@ -351,6 +351,29 @@ Because method negotiation can be viewed in the context of crypto agility, there
 is room for improvement.
 %
 
+Note: Section 5.1 says that if processing fails for some reason,
+then "typically" an error message is sent processing is terminated and protocol
+state is discarded. But: for algo negotiation (the only defined error
+message), then state is not discarded.
+
+Note: Section 5.2.2 says:
+"The Initiator MUST NOT change the supported cipher suites and
+the order of preference in SUITES_I based on previous error messages."
+But: what happens if order of preference changes for some other reason? Would it
+be good it include a flag in msg1 to indicate to the responder that the
+ciphersuite order depends on a previous run? This way, responder could react
+differently if a new cipher suite has been added without breaking the "MUST NOT"
+requirement. Need to think about this more.
+
+Note: Section 5.3.3 says about receiver processing of message 2:
+"If any processing step fails,
+the Responder MUST send an EDHOC error message back, formatted as defined in
+Section 6, and the session MUST be discontinued"
+And Section 5.4.3 about the responder processing of message 3:
+"If any processing step fails, the Responder MUST send an EDHOC error
+message back, formatted as defined in Section 6, and the session MUST
+be discontinued."
+The same is said in Section 5.5.3 about the initiator's processing of message 4.
 
 
 
