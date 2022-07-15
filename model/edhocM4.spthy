@@ -96,8 +96,27 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
             <!authV = MAC_2!>
          )
          plainText2 = <$V, authV>
+
+         /* Chose one of the following three encryption methods */
+         /* FIXME: make this selectable via a flag so we can show the lemmas
+          *        with the strongest encryption notion for each lemma.
+          */
+
+         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+          *  where responder uses STAT.
+          */
+         //K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
+         //K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
+         //CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
+
+         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+          */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
-         CIPHERTEXT_2 = senc{plainText2}K_2e
+         CIPHERTEXT_2 = plainText2 XOR K_2e
+
+         /* C: no XOR, regular DY encryption */
+         // K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
+         // CIPHERTEXT_2 = senc{plainText2}K_2e
         !>
 )
          m2 = <data_2, CIPHERTEXT_2>
@@ -180,9 +199,30 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
              prk_3e2m = extr(prk_2e, grx)!>
              ,
             <!prk_3e2m = prk_2e!>
-         ) 
+         )
+
+         /* Chose one of the following three encryption methods */
+         /* FIXME: make this selectable via a flag so we can show the lemmas
+          *        with the strongest encryption notion for each lemma.
+          */
+
+         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+          *  where responder uses STAT.
+          */
+         //K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
+         //K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
+         //CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
+
+         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+          */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
-         CIPHERTEXT_2 = senc{plainText2}K_2e
+         CIPHERTEXT_2 = plainText2 XOR K_2e
+
+         /* C: no XOR, regular DY encryption */
+         // K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
+         // CIPHERTEXT_2 = senc{plainText2}K_2e
+
+
          m2 = <data_2, CIPHERTEXT_2>
 
          K_2m = expa(<$cAEAD0, TH_2, 'K_2m'>, prk_3e2m)
