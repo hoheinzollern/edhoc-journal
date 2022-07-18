@@ -484,7 +484,7 @@ Formally, we model the TEE interface by adding two new rewrite rules:
 \begin{small}
 \begin{verbatim}
 rule forge_SIG:
-   [!LTK_SIG($A, ~ltk), In(xx)] --[TEE($A)]-> [Out(sign(xx, ~ltk))]!>
+   [!LTK_SIG($A, ~ltk), In(xx)] --[TEE($A)]-> [Out(sign(xx, ~ltk))]
 
 rule exp_STAT:
    [!LTK_STAT($A, ~ltk), In('g'^~xx)] --[TEE($A)]-> [Out(('g'^~xx)^~ltk)]
