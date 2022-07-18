@@ -346,7 +346,7 @@ message), then state is not discarded.
 
 Note: Section 5.2.2 says:
 "The Initiator MUST NOT change the supported cipher suites and
-the order of preference in SUITES_I based on previous error messages."
+the order of preference in SUITES\_I based on previous error messages."
 But: what happens if order of preference changes for some other reason? Would it
 be good it include a flag in msg1 to indicate to the responder that the
 ciphersuite order depends on a previous run? This way, responder could react
