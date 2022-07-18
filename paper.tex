@@ -500,7 +500,7 @@ long-term key (\verb|exp_STAT|).
 Because it is a trivial attack when the adversary access these rules with values
 from the test session, we must disqualify those rule applications.
 %
-We do so by creating an action fact \verb|TEE($A)|, where \verb|$A$| is the
+We do so by creating an action fact \verb|TEE($A)|, where \verb|$A| is the
 identity corresponding to the private key used, and then augmenting the
 properties with a condition that no such action fact exists from the start of
 the protocol execution and its end.
@@ -516,6 +516,30 @@ Specifically, ...
     they look incorrect now (should not be $\lor \forall \ldots$).
 }
 
+
+\paragraph{XOR expressiveness}
+We did not manage to get Tamarin to terminate for all lemmas and all methods
+with the added TEE extension.
+%
+When the responder uses the \mStat{} authentication method Tamarin did not
+complete the in a reasonable time for the authentication lemmas.
+%
+To combat this, we simplified the modeling of XOR encryption of message\_2 for
+these lemmas.
+%
+More precisely, the second message contains the two values \verb|V| and
+\verb|authV|, and we generally model the XOR encryption by xoring each of them
+with their own key-stream terms.
+%
+For the problematic lemmas however, we resorted to xoring the entire tuple
+\verb|<V, auth| with single key-stream term.
+%
+Given that no attacks were identified using our original modeling, this
+simplification is intuitively not a severe restriction.
+%
+However, it is possible that we now miss attacks on these methods 
+combining properties of the two-term XOR encryption with TEE capabilities.
+%
 
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Discussion}}
@@ -750,6 +774,10 @@ from the verified properties.
                 \hline
         \end{tabular}
 \end{table*}
+\knote{This should be extended with verification times and with TEE.
+    It should also show that when responder uses \mStat{} and \mSig{}, a
+    different XOR encryption is used.
+}
 
 Further, we identified a situation where initiators may establish an \mOscore{}
 security context with a different party than the application using \mEdhoc{}
