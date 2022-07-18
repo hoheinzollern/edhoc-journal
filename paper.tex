@@ -524,20 +524,20 @@ with the added TEE extension.
 When the responder uses the \mStat{} authentication method Tamarin did not
 complete the in a reasonable time for the authentication lemmas.
 %
-To combat this, we simplified the modeling of XOR encryption of message\_2 for
-these lemmas.
+To combat this, we simplified the modeling of XOR encryption of the second
+message for these lemmas when the responder uses \mStat{} authentication.
 %
 More precisely, the second message contains the two values \verb|V| and
 \verb|authV|, and we generally model the XOR encryption by xoring each of them
 with their own key-stream terms.
 %
 For the problematic lemmas however, we resorted to xoring the entire tuple
-\verb|<V, auth| with single key-stream term.
+\verb|<V, auth>| with a single key-stream term.
 %
 Given that no attacks were identified using our original modeling, this
 simplification is intuitively not a severe restriction.
 %
-However, it is possible that we now miss attacks on these methods 
+However, it is possible that we now miss attacks on these methods
 combining properties of the two-term XOR encryption with TEE capabilities.
 %
 
