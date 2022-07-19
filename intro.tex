@@ -1,20 +1,24 @@
 % !TEX root = paper.tex
-Traditionally, formal analysis for security protocols has been centered on devices with little to no resource constraints, where protocols like \mDandTls{} can be easily employed. 
+IoT protocols are often run on devices which operate under severe restrictions on resources like bandwidth and energy consumption.
 %
-However, as IoT gains popularity and is used for many applications, including potentially sensitive ones, it becomes paramount to analyze these protocols to ensure that they do not admit security flaws.
+These constrained devices are often simple in their operation, but need to communicate and function without human interference or maintenance for extended periods of time.
 %
-IoT protocols are often run on devices which operate under severe restrictions on resources like bandwidth and energy consumption. These devices are often simple in their operation, but need to communicate and function without human interference or maintenance for extended periods of time.
+IETF is standardizing new protocols to secure communications between constrained devices.
 %
-Other protocols have been proposed to secure communications between constrained devices. One such, which has been standardized by the IETF is the Object Security for Constrained RESTful Environments (\mOscore{}) protocol. 
+One such is the Object Security for Constrained RESTful Environments (\mOscore{}) protocol. 
 %
-However, \mOscore{} requires the pre-establishment of a security context. To this end, a key exchange protocol named Ephemeral Diffie-Hellman Over COSE (\mEdhoc{}) has been under discussion at the IETF. 
-
+However, \mOscore{} requires the pre-establishment of a security context.
+%
+To this end, a key exchange protocol named Ephemeral Diffie-Hellman Over COSE
+(\mEdhoc{}) is under discussion in the IETF. 
 %
 Since \mEdhoc{} will establish security contexts for \mOscore{}, the same resource constraints (especially those pertaining to message size) apply to the former as for the latter.
 %
 While establishing security contexts for \mOscore{} is the primary goal for the \mEdhoc{} protocol, there might well be other use cases, which have not been explored in depth yet.
 %
-It is therefore, very important to ensure that most of the fundamental properties expected of key exchange protocols as established in the literature are satisfied by \mEdhoc{} as well.
+It is therefore important to ensure that most of the fundamental properties expected of key exchange protocols as established in the literature are satisfied by \mEdhoc{} as well.
+%
+
 %-------------------------------------------------------------------------- sub
 \subsection{Evolution of \mEdhoc}
 \label{sec:edhocevol}
@@ -22,24 +26,29 @@ The first \mEdhoc{} framework was introduced in March 2016.
 %
 It allowed two different key establishment methods -- one involved a pre-shared Diffie-Hellman (DH) \emph{cryptographic core}, and the other was a variation on challenge-response signatures, {\`a} la \mOptls{}~\cite{DBLP:conf/eurosp/KrawczykW16}. 
 %
-A \emph{cryptographic core}, often just called a core, is an academic protocol, i.e. with no encodings or application-specific details as needed for an industrial protocol. 
+A \emph{cryptographic core}, often just called a core, is an academic protocol,
+i.e., with no encodings or application-specific details as needed for an industrial protocol. 
 %
 Once these ingredients are added to a cryptographic core, we obtain a key-establishment method.
 %
 Since then, the protocol has seen multiple changes.
 %
-In May 2018, the designers replaced the challenge-response signature core with one based on \mSigma{} (SIGn-and-MAc)~\cite{sigma,bruni-analysis-selander-ace-cose-ecdhe-08}, and in 2020, three new cores which mixed challenge-response signatures and ``regular'' authentication signatures were added as well~\cite{our-analysis-selander-lake-edhoc-00}.
+In May 2018, the designers replaced the challenge-response signature core with
+one based on \mSigma{}
+(SIGn-and-MAc)~\cite{sigma,bruni-analysis-selander-ace-cose-ecdhe-08}, and in
+2020, three new cores, which mixed challenge-response signatures and regular signatures were added as well~\cite{our-analysis-selander-lake-edhoc-00}.
 
 %-------------------------------------------------------------------------- sub
 \subsection{Related Work and Contributions}
 \label{sub:related}
-The earliest related work is by Bruni et al~\cite{DBLP:conf/secsr/BruniJPS18}, which formally analyzes the May 2018 version of \mEdhoc{} using the \mProverif{} tool~\cite{DBLP:conf/csfw/Blanchet01}. 
+The earliest related work is~\cite{DBLP:conf/secsr/BruniJPS18}, which formally analyzes the May 2018 version of \mEdhoc{} using the \mProverif{} tool~\cite{DBLP:conf/csfw/Blanchet01}. 
 %
-In this paper, the authors analyze two key establishment methods -- one built on a pre-shared key authentication core, and one on \mSigma{}. 
+In this paper, the authors analyze two key establishment methods -- one built on
+a pre-shared key authentication core, and one based on \mSigma{}. 
 %
 The authors check  various properties, namely secrecy, identity protection against an active adversary, strong authentication, perfect forward secrecy (PFS), and integrity of application data. 
 %
-In 2021, Norrman et al~\cite{Norr21} analyze the 2020 version of \mEdhoc{} in the \mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13}. 
+Later work~\cite{Norr21} analyze the May 2020 version of \mEdhoc{} in the \mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13}. 
 %
 This version of the protocol has five key establishment methods. 
 %
@@ -56,10 +65,11 @@ The authors also discuss some fallouts of the various design choices made as par
 In this paper, we extend the work presented in~\cite{Norr21}. 
 %
 We analyze the version of \mEdhoc{} as in the latest draft~\cite{}.
+\knote{possibly}
 %
-We modify the \mTamarin{} models used in that paper to obtain a significant speed-up in the verification time.
-%
-This required us to carefully modify the oracle as well.
+We extend the adversary model and \mTamarin{} models to capture weak
+post-compromise security (PCS) and modeling of Trusted Execution Environments
+(TEE).
 %
 We check for the following properties: \vnote{Fill this in}
 %
