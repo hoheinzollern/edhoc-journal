@@ -472,8 +472,9 @@ More precisely, parties using the \mSig{} authentication method use a TEE with
 an interface which accepts a message and returns the signature of that message
 using the party's private long-term key.
 %
-Parties using the \mStat{} authentication method use a TEE with an interface
-accepting $g^x$ and returning $g^x$ raised to the party's private long-term key.
+A party $U$ using the \mStat{} authentication method use a TEE with an interface
+accepting a point $p$ on the curve and returning $\mDH(p,\ \mGu{})$.
+%
 \knote{It should accept any value. Adversary may not stick to elements of the
     form $g^x$. Or we explicitly state that the TEE checks that the received
 input lies on the curve (but this may not be sufficient: are the curves cyclic
@@ -523,17 +524,20 @@ the protocol execution and its end.
 %
 Care must be taken when specifying the start and the end.
 %
-Specifically, ...
-\knote{Need to check this. Should we not allow access to both parties keys
-    before and after session? How could we otherwise claim KCI?
-}
-\knote{Need to check whether auth properties are correct. $\forall$ constructs
-    should be like the $\exists$ constructs of PFS. Not only for symmetry, but
-    they look incorrect now (should not be $\lor \forall \ldots$).
-}
+Specifically, the start and end of the protocol run must be viewed w.r.t. the
+role.
+%
+For example, the injective agreement property for the initiator in
+the \mSigSig{} method requires that the adversary does not have access to the
+TEE of the
+responder from the time of transmission of the first message until the second
+message is received by the initiator.
+%
+Because reception of one message and transmission of the next one at a party
+is an atomic operation, these timepoints represent the start and end of the
+protocol run from the perspective of the initiator.
+%
 
-
-\paragraph{XOR expressiveness}
 We did not manage to get Tamarin to terminate for all lemmas and all methods
 with the added TEE extension.
 %
@@ -543,12 +547,13 @@ complete the in a reasonable time for the authentication lemmas.
 To combat this, we simplified the modeling of XOR encryption of the second
 message for these lemmas when the responder uses \mStat{} authentication.
 %
-More precisely, the second message contains the two values \verb|V| and
-\verb|authV|, and we generally model the XOR encryption by xoring each of them
-with their own key-stream terms.
+More precisely, the second message contains the two values \verb|R| (the
+responder's identity) and
+\verb|authR| (the authentication information), and we generally model the
+XOR encryption by xoring each of them with their own key-stream terms.
 %
 For the problematic lemmas however, we resorted to xoring the entire tuple
-\verb|<V, auth>| with a single key-stream term.
+\verb|<R, authR>| with a single key-stream term.
 %
 Given that no attacks were identified using our original modeling, this
 simplification is intuitively not a severe restriction.
@@ -770,6 +775,11 @@ on an Intel Core i7-6500U 2.5GHz using two cores.
 %
 Mutual entity authentication, UKS- and KCI resistance can be inferred
 from the verified properties.
+\knote{In Section 3.3 we say that injective agreement does \emph{not} hold for
+    all methods. It is a little contradictory to the table below where we
+    exclude $P_I$. It would be better to show it as not holding when $P_i$ is
+    included (both for consistency and for clarity).
+}
 %
 \begin{table*}[h!]
         \centering
