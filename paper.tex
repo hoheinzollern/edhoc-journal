@@ -443,7 +443,23 @@ We extend the adversary model of~\cite{Norr21} by allowing the adversary
 access to a TEE interface on a party of their choosing before and after the
 \mEdhoc{} session.
 %
-This corresponds to a so-called weak post-compromise security
+This allows us to distinguish between a full compromise and a weak one, using
+the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
+%
+A weak compromise is when the adversary have temporary access to the TEE.
+%
+Seen in the framework of~\cite{DBLP:conf/icics/XuZRWTZ20}, we add adversary
+capabilities corresponding to a server adversary, i.e., an adversary that
+compromises a party, learns its ephemeral keys and may temporarily access its
+TEE, but does not learn the party's long-term key.
+%
+The model of~\cite{Norr21} only captures server adversary capabilities without
+access to the TEE, via the leakage of ephemeral keys, and local adversary
+capabilities, or more specifically, a secure-world adversary with read-write
+access to the
+secure world where the long-term keys reside via the leakage of long-term keys.
+%
+Our extension allows analysis of so-called weak post-compromise security
 (PCS)~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
 %
 
