@@ -28,7 +28,8 @@ In addition, they can interact with an unbounded number of protocol sessions, dr
 
 On top of the Dolev-Yao model, we allow the adversary two extra capabilities with respect to getting access to the long-term and ephemeral keys. 
 %
-Long-term key reveal, denoted $\mRevLTK^{t}(A)$, stands for the adversary gaining access to a principal $A$'s long-term private key \mPriv{A} at a time point $t$.
+Long-term key reveal, denoted $\mRevLTK^{t}(A)$, stands for the adversary
+gaining access to a party $A$'s long-term private key \mPriv{A} at a time point $t$.
 %
 Ephemeral key reveal, denoted $\mRevEph^{t}(A, k)$, stands for the adversary obtaining, at time $t$, the ephemeral private key \mPrivE{A} used by party $A$  in a session where they establish key material $k$.
 %
@@ -397,7 +398,7 @@ It is also important to keep track of the time points at which these events occu
 %
 Long-term keys can be revealed on registration, even before the protocol begins.
 %
-However, ephemeral keys in our model can only be revealed when a principal completes their role, i.e. simultaneous with events of type \mIComplete{} and \mRComplete.
+However, ephemeral keys in our model can only be revealed when a party completes their role, i.e. simultaneous with events of type \mIComplete{} and \mRComplete.
 %
 While we did try to reveal ephemeral keys at the start of protocol execution, we could not get the verification to terminate in such a model.
 \vnote{Do we still not get \mTamarin{} to terminate if we reveal ephemeral keys at the start of the protocol? With the TEEs etc?}
