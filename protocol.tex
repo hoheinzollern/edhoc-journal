@@ -408,12 +408,22 @@ key derivations used to construct these messages.
 %------------------------------------------------------------------------- sec
 \section{Implementation Aspects and Key Protection}
 \label{sec:TEE}
-Adversaries may have physical access to implementations, this is perhaps an
-even higher risk in an unsupervised IoT setting.
+Authentication of a specific IoT device assumes that this devices is the only
+entity with access to the long-term key associated with the corresponding
+identity.
 %
-Implementations can make use of Trusted Execution Environments (TEE) hardened
-against physical attacks to mitigate adversaries with physical access to the
-cryptographic keys.
+Since IoT devices may be accessible to adversaries, e.g., an insider cloning a
+key card, the long-term keys must be appropriately protected.
+%
+A state of the art approach is to use a Trusted Execution Environment (TEE),
+which holds the key and provides an API for operations using the key.
+%
+This is the approach taken by the
+Trust-Zone based \mMuEdhoc{}~\cite{DBLP:conf/codaspy/Hristozov0XFLS21}
+implementation for example.
+%
+Typical operations include signatures using the long-term private key of a
+party.
 %
 
 TEEs come in various forms of differing complexity.
@@ -459,3 +469,4 @@ the TEE and extend the interface to accept messages and return the
 %
 That is, the interface exposes \mAead{} functions in the interface.
 %
+

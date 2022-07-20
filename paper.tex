@@ -76,205 +76,6 @@ Here, we build on this work, and use \mTamarin{} to formally analyze the key est
 \input{formalization}
 
 %-------------------------------------------------------------------------- sec
-\section{\uppercase{Trusted Execution Environments}}
-\label{sec:TEE}
-The main purpose of Trusted Execution Environments (TEE) is to prevent an
-adversary with physical access to a device from accessing the computational
-circuits.
-%
-They come in various forms of differing complexity.
-%
-Some, like ARM Trust Zone and Intel SGX are general purpose execution
-environments, which are flexibly programmable.
-%
-Other, like the Universal Subscriber Identity Modules (USIM) used for
-authentication to 3GPP mobile networks, have application specific interfaces for
-authentication and key agreement protocols etc.
-%
-A key aspect is how much of the application is placed in the TEE and how much is
-outside.
-%
-
-For larger devices that include general purpose processors with Trust Zone or
-SGX, entire \mEdhoc{} and \mOscore{} may reside inside the TEE.
-%
-For constrained IoT devices in the lower end of the scale, a TEE may have to be
-implemented using a special-purpose integrated circuit.
-%
-In the latter case, it may be beneficial to follow a minimalistic approach, and
-contain the long-term key and only
-the operations that need access to it in the TEE for cost reasons.
-%
-
-It may at first appear more secure to implement as much as possible inside the
-TEE, but there is a security trade-off: the more code inside the TEE,
-the higher the risk of implementation errors in the security-critical code.
-%
-Because the security critical code runs in the area where the long-term keys
-reside, an implementation error here risks leaking information of the key to the
-adversary.
-%
-From this perspective, it may be beneficial to follow the minimalistic approach
-even when having access to Trust Zone or SGX.
-%
-
-A slightly more secure division of functionality is to also keep the
-session key inside
-the TEE and extend the interface to accept messages and return the
-(en/de)crypted counter part.
-%
-That is, the interface exposes \mAead{} functions in the interface.
-%
-
-%-------------------------------------------------------------------------- sub
-\subsection{Practical Aspects and Use Case}
-\label{sec:TEE:useCase}
-Authentication of a specific IoT device assumes that this devices is the only
-entity with access to the long-term key associated with the corresponding
-identity.
-%
-Since IoT devices may be accessible to adversaries, e.g., an insider cloning a
-key card, the long-term keys must be appropriately protected.
-%
-A state of the art approach is to use a Trusted Execution Environment (TEE),
-which holds the key and provides an API for operations using the key.
-%
-This is the approach taken by the
-Trust-Zone based \mMuEdhoc{}~\cite{DBLP:conf/codaspy/Hristozov0XFLS21}
-implementation for example.
-%
-Typical operations include signatures using the long-term private key of a
-party.
-%
-
-%-------------------------------------------------------------------------- sub
-\subsection{System and Adversary Model Extensions Supporting TEE}
-\label{sec:TEE:advModel}
-%
-We extend the adversary model of~\cite{Norr21} by allowing the adversary
-access to a TEE interface on a party of their choosing before and after the
-\mEdhoc{} session.
-%
-This allows us to distinguish between a full compromise and a weak one, using
-the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
-%
-A weak compromise is when the adversary have temporary access to the TEE.
-%
-Seen in the framework of~\cite{DBLP:conf/icics/XuZRWTZ20}, we add adversary
-capabilities corresponding to a server adversary, i.e., an adversary that
-compromises a party, learns its ephemeral keys and may temporarily access its
-TEE, but does not learn the party's long-term key.
-%
-The model of~\cite{Norr21} only captures server adversary capabilities without
-access to the TEE, via the leakage of ephemeral keys, and local adversary
-capabilities, or more specifically, a secure-world adversary with read-write
-access to the
-secure world where the long-term keys reside via the leakage of long-term keys.
-%
-Our extension allows analysis of so-called weak post-compromise security
-(PCS)~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
-%
-
-We split the \mEdhoc{} functionality as follows.
-%
-The TEE contains the long-term key and allows the non-TEE parts of the
-application to perform the operations on it via its interface.
-%
-More precisely, parties using the \mSig{} authentication method use a TEE with
-an interface which accepts a message and returns the signature of that message
-using the party's private long-term key.
-%
-A party $U$ using the \mStat{} authentication method use a TEE with an interface
-accepting a point $P$ on the curve and returning $\mDH(P,\ \mGu{})$.
-%
-\knote{It should accept any value. Adversary may not stick to elements of the
-    form $g^x$. Or we explicitly state that the TEE checks that the received
-input lies on the curve (but this may not be sufficient: are the curves cyclic
-groups? Need to check).}
-%
-The non-TEE parts implement \mEdhoc{} using this interface.
-%
-This interface requires the least functionality from the TEE, reducing the TEE's
-complexity and possibly cost of its implementation.
-%
-The functional split is suitable even for the situation where a
-constrained device has implemented only the storage of the long-term key in a
-special purpose circuit with minimal processing functionality.
-%
-Since \mEdhoc{} focuses on constrained IoT devices, it seems appropriate to
-cater for this setting.
-%
-
-%-------------------------------------------------------------------------- sub
-\subsection{Extended Formalism and Security Properties}
-\label{sec:TEE:fmAndProps}
-Formally, we model the TEE interface by adding two new rewrite rules:
-%
-\begin{small}
-\begin{verbatim}
-rule forge_SIG:
-   [!LTK_SIG($A, ~ltk), In(xx)] --[TEE($A)]-> [Out(sign(xx, ~ltk))]
-
-rule exp_STAT:
-   [!LTK_STAT($A, ~ltk), In('g'^~xx)] --[TEE($A)]-> [Out(('g'^~xx)^~ltk)]
-\end{verbatim}
-\end{small}
-%
-These rules allow the adversary to obtain terms representing signatures on a
-value of their choice to forge signatures (\verb|forge_SIG|), or to obtain terms
-representing a curve point of their choice raised to the power of the
-long-term key (\verb|exp_STAT|).
-%
-
-Because it is a trivial attack when the adversary access these rules with values
-from the test session, we must disqualify those rule applications.
-%
-We do so by creating an action fact \verb|TEE($A)|, where \verb|$A| is the
-identity corresponding to the private key used, and then augmenting the
-properties with a condition that no such action fact exists from the start of
-the protocol execution and its end.
-%
-Care must be taken when specifying the start and the end.
-%
-Specifically, the start and end of the protocol run must be viewed w.r.t. the
-role.
-%
-For example, the injective agreement property for the initiator in
-the \mSigSig{} method requires that the adversary does not have access to the
-TEE of the
-responder from the time of transmission of the first message until the second
-message is received by the initiator.
-%
-Because reception of one message and transmission of the next one at a party
-is an atomic operation, these timepoints represent the start and end of the
-protocol run from the perspective of the initiator.
-%
-
-We did not manage to get Tamarin to terminate for all lemmas and all methods
-with the added TEE extension.
-%
-When the responder uses the \mStat{} authentication method Tamarin did not
-complete the in a reasonable time for the authentication lemmas.
-%
-To combat this, we simplified the modeling of XOR encryption of the second
-message for these lemmas when the responder uses \mStat{} authentication.
-%
-More precisely, the second message contains the two values \verb|R| (the
-responder's identity) and
-\verb|authR| (the authentication information), and we generally model the
-XOR encryption by xoring each of them with their own key-stream terms.
-%
-For the problematic lemmas however, we resorted to xoring the entire tuple
-\verb|<R, authR>| with a single key-stream term.
-%
-Given that no attacks were identified using our original modeling, this
-simplification is intuitively not a severe restriction.
-%
-However, it is possible that we now miss attacks on these methods
-combining properties of the two-term XOR encryption with TEE capabilities.
-%
-
-%-------------------------------------------------------------------------- sec
 \section{\uppercase{Error handling}}
 \label{sec:errorHandling}
 Section 6 of the current \mEdhoc{} specification~\cite{draft-ietf-lake-edhoc-15} states that error messages can be sent at any time and by any party.
@@ -356,7 +157,7 @@ We communicated these issues to the authors of \mEdhoc{}.
 %
 \vnote{Add responses from the developers to these questions}
 
-\subsubsection{Non-Repudiation:}
+\subsubsection{Non-Repudiation.}
 Access control mechanisms can vary depending on what the underlying application is.
 %
 A nuclear power-plant might need to keep track of who enters and leaves, but a coffee machine that logs every user and their coffee preference might lead to a privacy concern.
@@ -365,7 +166,8 @@ This thought experiment allowed us to perceive that the \mEdhoc{} \mSpec{} did n
 %
 When we pointed this out to the authors of the \mSpec, they recognized this concern, and added a discussion about how the various \mEdhoc{} methods satisfy (or not) non-repudiation.
 
-\subsubsection{Unintended Peer Authentication: }
+\subsubsection{Unintended Peer Authentication.}
+\label{sec:unintendedPeerAuth}
 In Section~3.2 in the \mSpec{}, the authors state that parties executing \mEdhoc{} must be configured such that they only run \mEdhoc{} with a restricted (according to some reasonable policy) set of peers.
 %
 However, \mIdcredr{} in the second message is sent in the clear, and can therefore lead to some masquerade attacks by the adversary.
@@ -386,7 +188,7 @@ We included this check in our model.
 We communicated this to the authors of \mEdhoc{}.
 \vnote{And what did they do about it?}
 
-\subsubsection{Denial of Service: }
+\subsubsection{Denial of Service.}
 Denial of Service (DoS) attacks for IoT protocols are very well-studied.
 %
 But DoS is not well documented for \mEdhoc{} in particular, since it delegates DoS handling to the application.
