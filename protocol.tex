@@ -405,3 +405,57 @@ key derivations used to construct these messages.
 \label{fig:edhocsigstat}
 \end{figure}
 
+%------------------------------------------------------------------------- sec
+\section{Implementation Aspects and Key Protection}
+\label{sec:TEE}
+Adversaries may have physical access to implementations, this is perhaps an
+even higher risk in an unsupervised IoT setting.
+%
+Implementations can make use of Trusted Execution Environments (TEE) hardened
+against physical attacks to mitigate adversaries with physical access to the
+cryptographic keys.
+%
+
+TEEs come in various forms of differing complexity.
+%
+Some, like ARM Trust Zone and Intel SGX are general purpose execution
+environments, which are flexibly programmable.
+%
+Other, like the Universal Subscriber Identity Modules (USIM) used for
+authentication to 3GPP mobile networks, have application specific interfaces for
+authentication and key agreement protocols etc.
+%
+A key aspect is how much of the application is placed in the TEE and how much is
+outside.
+%
+
+For larger devices that include general purpose processors with Trust Zone or
+SGX, entire \mEdhoc{} and \mOscore{} may reside inside the TEE.
+%
+For constrained IoT devices in the lower end of the scale, a TEE may have to be
+implemented using a special-purpose integrated circuit.
+%
+In the latter case, it may be beneficial to follow a minimalistic approach, and
+contain the long-term key and only
+the operations that need access to it in the TEE for cost reasons.
+%
+
+It may at first appear more secure to implement as much as possible inside the
+TEE, but there is a security trade-off: the more code inside the TEE,
+the higher the risk of implementation errors in the security-critical code.
+%
+Because the security critical code runs in the area where the long-term keys
+reside, an implementation error here risks leaking information of the key to the
+adversary.
+%
+From this perspective, it may be beneficial to follow the minimalistic approach
+even when having access to Trust Zone or SGX.
+%
+
+A slightly more secure division of functionality is to also keep the
+session key inside
+the TEE and extend the interface to accept messages and return the
+(en/de)crypted counter part.
+%
+That is, the interface exposes \mAead{} functions in the interface.
+%
