@@ -1,5 +1,4 @@
 % !TEX root = paper.tex
-\vnote{Need to rewrite this based on the new spec}
 The \mEdhoc{} \mSpec{} \cite{our-analysis-selander-lake-edhoc-00} claims
 that \mEdhoc{} satisfies many security properties, but these are imprecisely
 expressed and motivated.
@@ -13,8 +12,6 @@ properties.
 %
 
 \subsection{Formal Model}\label{sec:threat-model}
-\vnote{Can we add extra references here? SAPIC+ etc? Can leak session keys as well.} 
-
 As in~\cite{Norr21}, we verify \mEdhoc{} in an extended
 Dolev-Yao model~\cite{DY83}.
 %
@@ -320,8 +317,6 @@ contents of the set $S$.
 %
 We formalize these properties as shown in Figure~\ref{fig:props}, which is
 a modified version of a figure in~\cite{Norr21}.
-\vnote{The figure changes because of TEEs}
-
 \begin{figure*}[ht]
 \begin{align*}
     \mPredPcs \triangleq\ & \forall I, R, \mSessKey, t_2, t_3\mLogicDot
@@ -657,8 +652,8 @@ respectively.
 1 rule registerLTK_STAT:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
 3        [!LTK_STAT($A, ~ltk),
-4         !PK_STAT($A, 'g'^~ltk),
-5         Out(<$A, 'g'^~ltk>)]
+4         !PK_STAT($A, `g'^~ltk),
+5         Out(<$A, `g'^~ltk>)]
 \end{verbatim}
 \end{small}
 \end{minipage}
@@ -750,11 +745,10 @@ This can be seen in lines 19--22 in the code for \mT{R2\_STAT\_SIG}.
 
 As we extended the model with TEEs and augmented the adversary's capabilities
 with access to them, \mTamarin{} failed to complete in a reasonable time for
-some combination of authentication methods and security properties (see XYZ)
-\knote{add reference to discussion section on this}.
+some combination of authentication methods and security properties (see Section~\ref{sec:conclusion} for a detailed discussion).
 %
 To circumvent the problem, we simplified the \mXor{} encryption to \mXor-ing a
-single term on the entire tuple for yjese cases.
+single term on the entire tuple for these cases. \\
 %
 
 {
@@ -822,6 +816,7 @@ single term on the entire tuple for yjese cases.
 \egroup
 %
 }
+\vspace{5mm}
 
 As mentioned earlier, we use actions to represent parametrized events.
 %
@@ -853,7 +848,7 @@ translate directly into \mTamarin's logic.
 %
 We show the \mTamarin{} lemma which encodes the \mPredPfs{} property.
 %
-Other properties are formalized similarly.
+Other properties are formalized similarly. \pagebreak
 %
 
 \begin{small}

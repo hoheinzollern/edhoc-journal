@@ -439,20 +439,14 @@ All measurements were taken on a server with 2 Intel(R) Xeon(R) Gold
 384 GiB installed).
 %
 Time measurements are rounded to the nearest second and we report both
-real and user times (i.e. time to complete the task and total CPU time
+the real time (time to complete the task) and user time (total CPU time
 spent for the task).
 %
-Mutual entity authentication, UKS- and KCI resistance can be inferred
+Mutual entity authentication, UKS- and KCI-resistance can be inferred
 from the verified properties.
-\knote{In Section 3.3 we say that injective agreement does \emph{not} hold for
-    all methods. It is a little contradictory to the table below where we
-    exclude $P_I$. It would be better to show it as not holding when $P_i$ is
-    included (both for consistency and for clarity).
-}
 %
 \begin{table*}[t]
         \centering
-          \label{tab:props}
           \resizebox{\textwidth}{!}{%
             \begin{tabular}{l|c|c|c|c}
               \textbf{Lemma $\backslash$ Method} & \textbf{SIG-SIG} & \textbf{SIG-STAT} & \textbf{STAT-SIG} & \textbf{STAT-STAT}\\
@@ -469,7 +463,6 @@ from the verified properties.
               \textbf{Integrity of AD3} & \cm & \cm & \cm & \cm\\
               \textbf{Time (real/user)} & 1m40s / 38m57s & 5m53s / 138m43s & 3m35s / 85m12s & 45m6s / 1029m1s\\
             \end{tabular}}\\[1em]
-
           \caption{Verified properties. $S_P$ contains roles,
             responder identity, session key material (excluding
             $P_I$), \mCi, \mCr, and \mSuites. $S_F$ is $S_{P}$,
@@ -484,6 +477,7 @@ from the verified properties.
             material, therefore in these two cases we check injective
             agreement for all key material except $P_I$.\\
           }
+                    \label{tab:props}
         % \begin{tabular}{|l|c|c|c|c|}
         %         \hline
         %         & \mSigSig & \mSigStat & \mStatSig & \mStatStat \\
@@ -515,8 +509,9 @@ In this work, we have analyzed the \mEdhoc{} version as of July
 There are newer versions and our analysis applies to at least the version from
 February 2021~\cite{latest-ietf-lake-edhoc-05}.
 %
-The latest version is \emph{draft-ietf-lake-edhoc-15}
+The latest version is \emph{draft-ietf-lake-edhoc-15}.
 %
+
 \knote{we are already citing too many different versions, so I don't think we
     should add this to the bib. Potentially, we should tomorrow instead remove
     and just mention some of the later versions.}
