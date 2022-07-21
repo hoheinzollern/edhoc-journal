@@ -324,45 +324,47 @@ a modified version of a figure in~\cite{Norr21}.
 
 \begin{figure*}[ht]
 \begin{align*}
-    \mPredPfs \triangleq\ & \forall I, R, \mSessKey, t_2, t_3\mLogicDot
+    \mPredPcs \triangleq\ & \forall I, R, \mSessKey, t_2, t_3\mLogicDot
     \mK^{t_3}(\mSessKey)\  \land\ 
     (\mIComplete^{t_2}(I, R, \mSessKey)\, \lor\, \mRComplete^{t_2}(I, R, \mSessKey))
     \rightarrow\\
     &(\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)
-    \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)
-    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
-    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))
-\end{align*}
-\begin{align*}
+    \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
+    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+%
     \mPredInjI \triangleq\ &
     \forall I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, \mSessKey, S)
     \rightarrow\\
-    &(\exists t_1\mLogicDot \mRStart^{t_1}(R, \mSessKey, S) \land t_1 \lessdot t_2)
+    &(\exists t_1\mLogicDot \mRStart^{t_1}(R, \mSessKey, S) \land t_1 \lessdot t_2
     \land (\forall I' R' t_1' \mLogicDot \mIComplete^{t_1'}(I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1)
-    \ \ \lor\ \ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)
-\end{align*}
-\begin{align*}
+        \rightarrow t_1' \doteq t_1))\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+%
     \mPredInjR \triangleq\ &
     \forall I, R, \mSessKey, S, t_2\mLogicDot \mRComplete^{t_2}(I, R, \mSessKey, S)
     \rightarrow\\
-    &(\exists t_1\mLogicDot \mIStart^{t_1}(I, R, \mSessKey, S) \land t_1 \lessdot t_2)
+    &(\exists t_1\mLogicDot \mIStart^{t_1}(I, R, \mSessKey, S) \land t_1 \lessdot t_2
     \land (\forall I' R' t_1' \mLogicDot \mRComplete^{t_1'}(I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1)
-    \ \ \lor\ \ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2).
-\end{align*}
-\begin{align*}
+        \rightarrow t_1' \doteq t_1))\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+%
     \mPredImpI \triangleq\ &
     \forall I, R, \mSessKey, S, t_1\mLogicDot \mIComplete^{t_1}(I, R, \mSessKey, S)
     \rightarrow\\
       &(\forall I', R', S', t_2\mLogicDot \mRComplete^{t_2}(I', R', \mSessKey, S') \rightarrow
-             (I=I' \land R=R' \land S=S'))\\
-      &\land (\forall I', R', S', t_1'\mLogicDot
-        (\mIComplete^{t_1'}(I', R', \mSessKey, S') \rightarrow t_1' \doteq t_1
-        )\\
-      &\ \ \ \lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
+             (I=I' \land R=R' \land S=S')\\
+      &\ \ \land (\forall I', R', S', t_1'\mLogicDot
+        \mIComplete^{t_1'}(I', R', \mSessKey, S') \rightarrow t_1' \doteq t_1
+        ))\\
+    &\lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
-    \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey)).
+    \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey))\\
+    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))
 \end{align*}
 %
 \caption{Formalization of security properties and adversary model.}
