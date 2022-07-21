@@ -37,6 +37,8 @@ TSTATSTAT=TMP_${STATSTAT}
 MPSKPSK=-Dm4METHODI=PSK -Dm4METHODR=PSK
 PSKPSK=edhoc_PSK_PSK.spthy
 TPSKPSK=TMP_${PSKPSK}
+XORMODEL=FULL
+MXOR=-Dm4XOR=${XORMODEL}
 
 SPTHYS=${PSKPSK} ${SIGSIG} ${STATSIG} ${SIGSTAT} ${STATSTAT}
 
@@ -57,17 +59,17 @@ TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) 2>&1 | gzip > 
 #TIME_PROVE_AND_LOG=(time ${TAMARIN} --prove=LEMMAPREFIX TMP_METH) 2>/dev/null | gzip > ${PROOFS}/LEMMAPREFIX-METH.gz ;
 
 check:
-	zgrep --color=auto -E "verified|falsified|Killed|(user.*m.*s)" ${PROOFS}/*
+	zgrep --color=auto -E "verified|falsified|Killed|(user.*m.*s)|(real.*m.*s)" ${PROOFS}/*
 
 proofdir:
 	mkdir -p proofs
 
 genModels: proofdir
-	m4 ${MFLAGS} ${MSIGSTAT} ${SRC} > ${TSIGSTAT}
-	m4 ${MFLAGS} ${MSTATSIG} ${SRC} > ${TSTATSIG}
-	m4 ${MFLAGS} ${MSTATSTAT} ${SRC} > ${TSTATSTAT}
-	m4 ${MFLAGS} ${MSIGSIG} ${SRC} > ${TSIGSIG}
-	m4 ${MFLAGS} ${MPSKPSK} ${SRC} > ${TPSKPSK}
+	m4 ${MFLAGS} ${MSIGSTAT} ${MXOR} ${SRC} > ${TSIGSTAT}
+	m4 ${MFLAGS} ${MSTATSIG} ${MXOR} ${SRC} > ${TSTATSIG}
+	m4 ${MFLAGS} ${MSTATSTAT} ${MXOR} ${SRC} > ${TSTATSTAT}
+	m4 ${MFLAGS} ${MSIGSIG} ${MXOR} ${SRC} > ${TSIGSIG}
+	m4 ${MFLAGS} ${MPSKPSK} ${MXOR} ${SRC} > ${TPSKPSK}
 
 # This target is useful for viewing the GUI
 interactive: genModels
