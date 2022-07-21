@@ -99,18 +99,18 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
 
          /* Chose one of the following three encryption methods */
 	 ifelse(<!FULL!>, m4XOR,<!
-         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+         /* FULL: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
           */
          K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
          K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
          CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2> !> , <!
 	 ifelse(<!SIMPLE!>, m4XOR, <!
-         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+         /* SIMPLE: XOR encryption with one term XORed on the entire plaintext tuple
           */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = plainText2 XOR K_2e !> , <!
-         /* C: no XOR, regular DY encryption */
+         /* ENC: no XOR, regular DY encryption */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = senc{plainText2}K_2e !> ) !> )
         !>
@@ -199,18 +199,18 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
 
          /* Chose one of the following three encryption methods */
 	 ifelse(<!FULL!>, m4XOR, <!
-         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+         /* FULL: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
           */
    	 K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
          K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
          CIPHERTEXT_2 = <$V XOR K_2e_1, authR XOR K_2e_2> !> , <!
 	 ifelse(<!SIMPLE!>, m4XOR, <!
-         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+         /* SIMPLE: XOR encryption with one term XORed on the entire plaintext tuple
           */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = plainText2 XOR K_2e !> , <!
-         /* C: no XOR, regular DY encryption */
+         /* ENC: no XOR, regular DY encryption */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = senc{plainText2}K_2e !> ) !> )
 

@@ -322,8 +322,14 @@ $P_I$, i.e., on the set $S_F$.
 %
 Implicit agreement covers all previously mentioned parameters for both peers.
 %
-Verification of all lemmas, including model validation lemmas, took 42 minutes
-on an Intel Core i7-6500U 2.5GHz using two cores.
+All measurements were taken on a server with 2 Intel(R) Xeon(R) Gold
+6242 CPU @ 2.80GHz with a total of 32 cores / 64 threads and reserved
+256 GiB of memory for the scheduled job (the machine has a total of
+384 GiB installed).
+%
+Time measurements are rounded to the nearest second and we report both
+real and user times (i.e. time to complete the task and total CPU time
+spent for the task).
 %
 Mutual entity authentication, UKS- and KCI resistance can be inferred
 from the verified properties.
@@ -333,29 +339,52 @@ from the verified properties.
     included (both for consistency and for clarity).
 }
 %
-\begin{table*}[h!]
+\begin{table*}[t]
         \centering
-        \caption{Verified properties. $S_P$ contains
-            roles, responder identity, session key material (excluding
+          \label{tab:props}
+          \resizebox{\textwidth}{!}{%
+            \begin{tabular}{l|c|c|c|c}
+              \textbf{Lemma $\backslash$ Method} & \textbf{SIG-SIG} & \textbf{SIG-STAT} & \textbf{STAT-SIG} & \textbf{STAT-STAT}\\
+              \hline
+              \textbf{Injective agreement / I} & $S_F$ & $S_F$ & $S_P\ddagger$ & $S_P\ddagger$\\
+              \textbf{Injective agreement / R} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Time (real/user)} & 0m27s / 11m17s & 9m27s / 239m49s & 1m21s / 35m36s & 18m16s / 499m2s\\
+              \textbf{Implicit agreement / I} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Implicit agreement / R} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Time (real/user)} & 2m37s / 65m40s & 5m28s / 131m12s $\dagger$ & 8m54s / 212m21s & 7m37s / 188m46s $\dagger$\\
+              \textbf{Session key secrecy} & \cm & \cm & \cm & \cm\\
+              \textbf{Time (real/user)} & 0m41s / 16m4s & 1m52s / 45m27s & 6m31s / 156m26s & 9m47s / 232m2s\\
+              \textbf{Secrecy of AD3} & \cm & \cm & \cm & \cm\\
+              \textbf{Integrity of AD3} & \cm & \cm & \cm & \cm\\
+              \textbf{Time (real/user)} & 1m40s / 38m57s & 5m53s / 138m43s & 3m35s / 85m12s & 45m6s / 1029m1s\\
+            \end{tabular}}\\[1em]
+
+          \caption{Verified properties. $S_P$ contains roles,
+            responder identity, session key material (excluding
             $P_I$), \mCi, \mCr, and \mSuites. $S_F$ is $S_{P}$,
-            the initiator identity, and $P_I$.}
-        \label{tab:props}
-        \begin{tabular}{|l|c|c|c|c|}
-                \hline
-                & \mSigSig & \mSigStat & \mStatSig & \mStatStat \\
-                \hline
-                Injective agreement for I & $S_F$ & $S_F$ & $S_P$ & $S_P$\\
-                Injective agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                Implicit agreement for I & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                Implicit agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                PFS for session key material & \cm & \cm & \cm & \cm\\
-                \hline
-        \end{tabular}
+            the initiator identity, and $P_I$.\\
+            $\dagger$: For SIG-STAT and STAT-STAT implicit
+            authentication using the full XOR model the verification
+            was killed at 14246m43s and 2057m47s of computation time,
+            respectively. The time reported is for verification under
+            the simplified XOR modeling of message 2.\\
+            $\ddagger$: When the initiator is using STAT mode we
+            cannot get explicit agreement on the intiator's own key
+            material, therefore in these two cases we check injective
+            agreement for all key material except $P_I$.\\
+          }
+        % \begin{tabular}{|l|c|c|c|c|}
+        %         \hline
+        %         & \mSigSig & \mSigStat & \mStatSig & \mStatStat \\
+        %         \hline
+        %         Injective agreement for I & $S_F$ & $S_F$ & $S_P$ & $S_P$\\
+        %         Injective agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         Implicit agreement for I & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         Implicit agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         PFS for session key material & \cm & \cm & \cm & \cm\\
+        %         \hline
+        % \end{tabular}
 \end{table*}
-\knote{This should be extended with verification times and with TEE.
-    It should also show that when responder uses \mStat{} and \mSig{}, a
-    different XOR encryption is used.
-}
 
 Further, we identified a situation where initiators may establish an \mOscore{}
 security context with a different party than the application using \mEdhoc{}
