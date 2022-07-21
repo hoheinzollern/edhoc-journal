@@ -98,10 +98,6 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
          plainText2 = <$V, authV>
 
          /* Chose one of the following three encryption methods */
-         /* FIXME: make this selectable via a flag so we can show the lemmas
-          *        with the strongest encryption notion for each lemma.
-          */
-
 	 ifelse(<!FULL!>, m4XOR,<!
          /* A: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
@@ -202,10 +198,6 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
          )
 
          /* Chose one of the following three encryption methods */
-         /* FIXME: make this selectable via a flag so we can show the lemmas
-          *        with the strongest encryption notion for each lemma.
-          */
-
 	 ifelse(<!FULL!>, m4XOR, <!
          /* A: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
