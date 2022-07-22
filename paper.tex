@@ -61,31 +61,31 @@
 %
 
 \begin{abstract}
-Given how common IoT devices that use constrained resources are becoming 
-today, the need of the hour is communication protocols which can operate 
+Given how common IoT devices that use constrained resources are becoming
+today, the need of the hour is communication protocols which can operate
 securely under such limitations.
 %
-For a few years, the Internet Engineering Task Force (IETF) has been working 
-to standardize \mEdhoc{}, an authenticated key establishment protocol for 
+For a few years, the Internet Engineering Task Force (IETF) has been working
+to standardize \mEdhoc{}, an authenticated key establishment protocol for
 such constrained IoT devices.
 %
 The first version of \mEdhoc{} was proposed in 2016.
 %
-In 2018, Bruni et al.~\cite{DBLP:conf/secsr/BruniJPS18} used the \mProverif{} 
-tool~\cite{DBLP:conf/csfw/Blanchet01} to formally analyze an early version of 
-\mEdhoc{}, which had only two key establishment methods.  
+In 2018, Bruni et al.~\cite{DBLP:conf/secsr/BruniJPS18} used the \mProverif{}
+tool~\cite{DBLP:conf/csfw/Blanchet01} to formally analyze an early version of
+\mEdhoc{}, which had only two key establishment methods.
 %
-%By now, the protocol has been fleshed out much more, and has been 
+%By now, the protocol has been fleshed out much more, and has been
 %augmented with multiple new key establishment methods.
-By 2021, the protocol had been fleshed out much more, with multiple new key 
-establishment methods, and this version was formally analyzed using the 
+By 2021, the protocol had been fleshed out much more, with multiple new key
+establishment methods, and this version was formally analyzed using the
 \mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13} in~\cite{Norr21}.
 %
-Here, we build on this work, by modifying the model, adding new properties 
-that we analyze, and discussing some of the aspects of the latest \mEdhoc{} 
-specification. In particular, we extend the modelling with trusted execution 
-environments (TEEs), modify the way we model \mXor{} encryption, and 
-verify weak post-compromise security (PCS) as well as the secrecy and 
+Here, we build on this work, by modifying the model, adding new properties
+that we analyze, and discussing some of the aspects of the latest \mEdhoc{}
+specification. In particular, we extend the modeling with trusted execution
+environments (TEEs), modify the way we model \mXor{} encryption, and
+verify weak post-compromise security (PCS) as well as the secrecy and
 integrity of some additional data used as part of the protocol.
 \keywords{Formal Verification, Symbolic Dolev-Yao Model,
            Authenticated Key Establishment, Protocols, IoT, Tamarin.}
@@ -108,91 +108,91 @@ integrity of some additional data used as part of the protocol.
 \input{formalization}
 
 %-------------------------------------------------------------------------- sec
-\section{\uppercase{Error handling}}
+\section{\uppercase{Error Handling}}
 \label{sec:errorHandling}
-Section 6 of the current \mEdhoc{} 
-specification~\cite{draft-ietf-lake-edhoc-15} 
+Section 6 of the current \mEdhoc{}
+specification~\cite{draft-ietf-lake-edhoc-15}
 states that error messages can be sent at any time and by any party.
 %
-There are three types of error messages: type 0 is used to represent success, 
-type 1 represents a generic error message used for debugging purposes, and 
-type 2 represents the failure to negotiate a common ciphersuite. 
+There are three types of error messages: type 0 is used to represent success,
+type 1 represents a generic error message used for debugging purposes, and
+type 2 represents the failure to negotiate a common ciphersuite.
 %
 Type 2 messages carry a list of supported ciphersuites by the responder.
 %
-The contents and semantics of type 1 messages are dependent on the 
+The contents and semantics of type 1 messages are dependent on the
 implementation.
 %
-Consequently, type 1 error messages provide a generic message passing 
+Consequently, type 1 error messages provide a generic message passing
 mechanism, albeit without a predefined semantics.
 %
 We now discuss some issues with this specification of error messages.
 %
-In this section, we use ``specification'' to mean the latest specification, as 
+In this section, we use ``specification'' to mean the latest specification, as
 in~\cite{draft-ietf-lake-edhoc-15}.
 
-\subsection{Lack of connection identifiers}
-Error messages do not include the optional connection identifiers \mCi{} or 
+\subsection{Lack of Connection Identifiers}
+Error messages do not include the optional connection identifiers \mCi{} or
 \mCr{}.
 %
-This is potentially problematic for connection-less transport layers, where 
+This is potentially problematic for connection-less transport layers, where
 these identifiers may be used to correlate messages.
 
-\subsection{Improper handling}
-\mEdhoc{} provides an error message mechanism, but little to no guidance on 
+\subsection{Proper Reception Handling}
+\mEdhoc{} provides an error message mechanism, but little to no guidance on
 how it should be used safely.
 %
-For example, assume that an application using \mEdhoc{} logs error messages 
+For example, assume that an application using \mEdhoc{} logs error messages
 on a finite log with rotation.
 %
-If the log is used for anomaly detection or detection of sensitive events, then 
-an adversary can simply inject error messages and fill the log until the 
+If the log is used for anomaly detection or detection of sensitive events, then
+an adversary can simply inject error messages and fill the log until the
 sensitive event is overwritten.
 %
-In such situations, implementors should do proper log-separation and log 
+In such situations, implementers should do proper log-separation and log
 management.
 
-\subsection{Unspecified semantics for debugging messages}
-Section 6.2 gives an example of sending a type 1 error message with the 
+\subsection{Unspecified Semantics for Debugging Messages}
+Section 6.2 gives an example of sending a type 1 error message with the
 information string ``Method not supported".
 %
-Note that \mEdhoc{} does not include a mechanism to support the 
+Note that \mEdhoc{} does not include a mechanism to support the
 negotiating of the connection method.
 %
-The initiator selects the method as part of the first message, and if the 
-responder replies with a type 1 error message along with the information 
-string ``Method not supported", the standard does not tell an 
-implementation how to act upon this information string for negotiation 
+The initiator selects the method as part of the first message, and if the
+responder replies with a type 1 error message along with the information
+string ``Method not supported", the standard does not tell an
+implementation how to act upon this information string for negotiation
 purposes.
 %
-An adversary can fake an error message, and there is no algorithm that is 
-specified to ensure that a common available authentication mechanism is 
+An adversary can fake an error message, and there is no algorithm that is
+specified to ensure that a common available authentication mechanism is
 always selected.
 %
-In particular, note that Section 5.1 in the specification states that if processing 
-fails for some reason, then ``typically" an error message is sent, processing is 
-terminated and protocol state is discarded. 
+In particular, note that Section 5.1 in the specification states that if processing
+fails for some reason, then ``typically" an error message is sent, processing is
+terminated, and protocol state is discarded.
 %
 But negotiation needs us to remember state.
 
-With respect to ciphersuite negotiation, Section 5.2.2 of the specification also 
+With respect to ciphersuite negotiation, Section 5.2.2 of the specification also
 states ``The Initiator MUST NOT change the supported cipher suites and
-the order of preference in SUITES\_I based on previous error messages.'' 
+the order of preference in SUITES\_I based on previous error messages.''
 %
-However, \mSuites is sent in the clear, and therefore can be modified by the 
+However, \mSuites{} is sent in the clear, and therefore can be modified by the
 adversary.
 %
-It is important to consider what happens if the order of preference in 
-\mSuites{} is changed either by the adversary, or by the initiator themselves 
+It is important to consider what happens if the order of preference in
+\mSuites{} is changed either by the adversary, or by the initiator themselves
 for some other reason.
 %
-It might be helpful to include a flag in \mMsgone{} to indicate to the 
+It might be helpful to include a flag in \mMsgone{} to indicate to the
 responder
 that a (modified) ciphersuite ordering depends on that from a previous
 execution.
 
 %-------------------------------------------------------------------------- sec
-\section{\uppercase{Improvements to the specification}}
+\section{\uppercase{Improvements to the Specification}}
 \label{sec:discussion}
 The \mEdhoc{} \mSpec{} has many points where it can be improved.
 %
@@ -227,12 +227,10 @@ We communicated these points to the authors of \mEdhoc{}.
 
 %----------------------------------------------------------------------- subsub
 \subsubsection{Non-Repudiation.}
-Access control mechanisms can vary depending on what the underlying 
-application
+Access control mechanisms can vary depending on what the underlying application
 is.
 %
-A nuclear power-plant might need to keep track of who enters and leaves, but 
-a
+A nuclear power-plant might need to keep track of who enters and leaves, but a
 coffee machine that logs every user and their coffee preference might lead to a
 privacy concern.
 %
@@ -379,7 +377,7 @@ for storage.
 %
 
 \mEdhoc{} responders querying external servers for certificate revocation checks
-or lookups may casue systems-level issues if many distributed \mEdhoc{}
+or lookups may cause systems-level issues if many distributed \mEdhoc{}
 responders frequently queries such servers when DoSed by clients.
 %
 
@@ -440,7 +438,7 @@ module.
 \subsection{Session Key Material}
 \label{sec:sessionKeyMaterial}
 As we have seen, \mEdhoc{} establishes some
-session key material, which can be fed into the \mEdhoc{}-Exporter to derive
+session-key material, which can be fed into the \mEdhoc{}-Exporter to derive
 session keys.
 %
 This key material is directly influenced by \mGxy{} and a party's secret static
@@ -458,7 +456,7 @@ for addressing this to the \mEdhoc{} authors.
 %
     This increases message size and also leaks the initiator's identity.
 %
-    \item Derive session key material without using $P_{I}$:
+    \item Derive session-key material without using $P_{I}$:
 %
     This deviates from the structure of protocols like \mOptls{} from which the
     \mStat{}-based methods draw heavy inspiration.
@@ -480,7 +478,6 @@ necessary to provide explicit injective agreement on $P_{I}$.
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Conclusions and Future Work}}
 \label{sec:conclusion}
-%\label{sec:newdrafts}
 We formally modeled all four
 methods of the \mEdhoc{} \mSpec{} using \mTamarin.
 %
@@ -490,7 +487,7 @@ adversary models in which we verified these.
 The properties are shown in Table~\ref{tab:props}.
 %
 Mutual injective agreement covers the parameters $S_P$:
-responder identity, roles, session key material (except for $P_I$ when
+responder identity, roles, session-key material (except for $P_I$ when
 initiator uses the \mStat{} authentication
 method), context identifiers \mCi{} and \mCr, and cipher suites \mSuites.
 %
@@ -539,7 +536,7 @@ $S_P\ddagger$\\
 			\hline
             \end{tabular}}\\[1em]
           \caption{Verified properties. $S_P$ contains roles,
-            responder identity, session key material (excluding
+            responder identity, session-key material (excluding
             $P_I$), \mCi, \mCr, and \mSuites. $S_F$ is $S_{P}$,
             the initiator identity, and $P_I$.\\
             $\dagger$: For SIG-STAT and STAT-STAT implicit
