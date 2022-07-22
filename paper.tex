@@ -83,7 +83,7 @@ establishment methods, and this version was formally analyzed using the
 %
 Here, we build on this work, by modifying the model, adding new properties
 that we analyze, and discussing some of the aspects of the latest \mEdhoc{}
-specification. In particular, we extend the modelling with trusted execution
+specification. In particular, we extend the modeling with trusted execution
 environments (TEEs), modify the way we model \mXor{} encryption, and
 verify weak post-compromise security (PCS) as well as the secrecy and
 integrity of some additional data used as part of the protocol.
@@ -108,7 +108,7 @@ integrity of some additional data used as part of the protocol.
 \input{formalization}
 
 %-------------------------------------------------------------------------- sec
-\section{\uppercase{Error handling}}
+\section{\uppercase{Error Handling}}
 \label{sec:errorHandling}
 Section 6 of the current \mEdhoc{}
 specification~\cite{draft-ietf-lake-edhoc-15}
@@ -131,14 +131,14 @@ We now discuss some issues with this specification of error messages.
 In this section, we use ``specification'' to mean the latest specification, as
 in~\cite{draft-ietf-lake-edhoc-15}.
 
-\subsection{Lack of connection identifiers}
+\subsection{Lack of Connection Identifiers}
 Error messages do not include the optional connection identifiers \mCi{} or
 \mCr{}.
 %
 This is potentially problematic for connection-less transport layers, where
 these identifiers may be used to correlate messages.
 
-\subsection{Improper handling}
+\subsection{Proper Reception Handling}
 \mEdhoc{} provides an error message mechanism, but little to no guidance on
 how it should be used safely.
 %
@@ -149,10 +149,10 @@ If the log is used for anomaly detection or detection of sensitive events, then
 an adversary can simply inject error messages and fill the log until the
 sensitive event is overwritten.
 %
-In such situations, implementors should do proper log-separation and log
+In such situations, implementers should do proper log-separation and log
 management.
 
-\subsection{Unspecified semantics for debugging messages}
+\subsection{Unspecified Semantics for Debugging Messages}
 Section 6.2 gives an example of sending a type 1 error message with the
 information string ``Method not supported".
 %
@@ -179,7 +179,7 @@ With respect to ciphersuite negotiation, Section 5.2.2 of the specification also
 states ``The Initiator MUST NOT change the supported cipher suites and
 the order of preference in SUITES\_I based on previous error messages.''
 %
-However, \mSuites is sent in the clear, and therefore can be modified by the
+However, \mSuites{} is sent in the clear, and therefore can be modified by the
 adversary.
 %
 It is important to consider what happens if the order of preference in
@@ -192,7 +192,7 @@ that a (modified) ciphersuite ordering depends on that from a previous
 execution.
 
 %-------------------------------------------------------------------------- sec
-\section{\uppercase{Improvements to the specification}}
+\section{\uppercase{Improvements to the Specification}}
 \label{sec:discussion}
 The \mEdhoc{} \mSpec{} has many points where it can be improved.
 %

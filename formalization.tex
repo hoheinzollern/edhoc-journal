@@ -12,6 +12,7 @@ verify
 properties.
 %
 
+%---------------------------------------------------------------------- subsub
 \subsection{Formal Model}\label{sec:threat-model}
 As in~\cite{Norr21}, we verify \mEdhoc{} in an extended
 Dolev-Yao model~\cite{DY83}.
@@ -394,7 +395,7 @@ S)
 
 
 %----------------------------------------------------------------------- PFS
-\subsubsection{Secrecy of the Session-key Material.}
+\subsubsection{Secrecy of the Session-Key Material.}
 \label{sec:secrecy}
 We show that the adversary cannot gain access to the session-key material
 \mSessKey{}, even under a weak post-compromise security model that allows the
@@ -528,7 +529,7 @@ Figure~\ref{fig:props} contains the definition for \mPredImpI{}.
 %
 
 %------------------------------------------------------- Agreed parameters
-\subsubsection{Parameters in set $S$.}
+\subsubsection{Set $S$ of Agreed Parameters.}
 \label{sec:agreedParams}
 We now describe the set $S$ of parameters upon which the two parties obtain
 guarantees via the above properties.
@@ -601,7 +602,7 @@ interaction between \mEdhoc{} and the application leading to similar issues.
 %
 
 %---------------------------------------------------------------------------sub
-\subsection{Encoding \mEdhoc{} in \mTamarin}
+\subsection{Encoding \mEdhoc{} in \mTamarin{}}
 \label{sec:modeling}
 %
 In this section, we describe how we model the \mSigSig, \mSigStat, \mStatSig,
@@ -674,7 +675,7 @@ decrypt(aeadEncrypt(m, k, ad, ai), k, ai) = m.
 %
 
 Having described how we adapt the equational theory to model \mEdhoc,
-we now move on to the modelling of the adversary model and the 
+we now move on to the modeling of the adversary model and the 
 environment in
 which the protocol is executed.
 %
