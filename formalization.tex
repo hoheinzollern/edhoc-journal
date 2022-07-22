@@ -708,8 +708,8 @@ respectively.
 1 rule registerLTK_STAT:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
 3        [!LTK_STAT($A, ~ltk),
-4         !PK_STAT($A, `g'^~ltk),
-5         Out(<$A, `g'^~ltk>)]
+4         !PK_STAT($A, 'g'^~ltk),
+5         Out(<$A, 'g'^~ltk>)]
 \end{verbatim}
 \end{scriptsize}
 \end{minipage}
@@ -898,14 +898,14 @@ Other properties are formalized similarly.
 \begin{verbatim}
 1 lemma secrecyPFS:
 2    all-traces
-3    ''All u v sk tid #t3 #t2.
+3    "All u v sk tid #t3 #t2.
 4        (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
 5        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
 6        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
 7        | (Ex #t1. EphKeyRev(sk)@t1)
 8        | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
 9        | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
-10       )''
+10       )"
 \end{verbatim}
 \end{small}
 %

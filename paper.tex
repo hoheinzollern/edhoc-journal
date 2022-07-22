@@ -252,8 +252,7 @@ In Section~3.2 in the \mSpec{}, the authors state that parties executing
 restricted (according to some reasonable policy) set of peers.
 %
 However, the responsibilities of verifying which identity was authenticated is
-not clearly split between the application and \mEdhoc{} and therefore an 
-attack
+not clearly split between the application and \mEdhoc{} and therefore an attack
 similar in effect to UKS is possible.
 %
 
@@ -261,8 +260,7 @@ Suppose a person configures the restriction policy such that every device in
 their home is allowed to set up an \mEdhoc{} session with any other device in
 the home.
 %
-However, the adversary has managed to gain control of one of these devices 
-(say
+However, the adversary has managed to gain control of one of these devices (say
 $A$).
 %
 Device $A$ is part of the allowed group of devices, so $B$ will accept an
@@ -275,8 +273,7 @@ However, if $A$ responds to the initial message before $C$ can, the \mSpec{}
 does not require $B$ to verify that \mIdcredr{} matches what is expected for
 $C$.
 %
-A valid \mEdhoc{} implementation may then look up the appropriate 
-credentials
+A valid \mEdhoc{} implementation may then look up the appropriate credentials
 for $A$, complete the execution and deliver the security context to the
 application.
 %
@@ -289,11 +286,9 @@ identity thwarts the problem.
 %
 We included this check in our model.
 %
-We communicated this to the authors of \mEdhoc{}, who in the latest version 
-of
+We communicated this to the authors of \mEdhoc{}, who in the latest version of
 the \mSpec{}, added that \mEdhoc{} makes \mIdcredr{} available to the
-application, and added an appendix D listing credential validations 
-that
+application, and added an appendix D listing credential validations that
 the application must take care of.
 %
 
@@ -302,17 +297,15 @@ the application must take care of.
 Denial of Service (DoS) attacks for IoT protocols are well-studied,
 but DoS aspects particular to \mEdhoc{} is not.
 %
-The \mSpec{} does not include any specific measures for countering such 
-attacks,
-but assumes the application takes care of it.
+The \mSpec{} does not include any specific measures countering such
+attacks, but assumes the application takes care of it.
 
 Section 8.7 of the latest version of the \mEdhoc{}
 \mSpec{}~\cite{draft-ietf-lake-edhoc-15}
 gives two recommendations for countering DoS attacks.
 %
 First, \mEdhoc{} relies on lower layers to mitigate DoS, and an example of DoS
-countermeasures is given: checking the return address upon receipt of the 
-first
+countermeasures is given: checking the return address upon receipt of the first
 message.
 %
 Second, a recommendation is given that applications may try to determine (in
@@ -320,14 +313,11 @@ some way) that a seemingly valid message is in fact probably a forgery and
 should be ignored or cause the protocol to abort.
 %
 
-No recommendation is given on how to minimize DoS effects stemming from 
-the use
-of error messages, which can be used in a relatively arbitrary way in 
-\mEdhoc{}
+No recommendation is given on how to minimize DoS effects stemming from the use
+of error messages, which can be used in a relatively arbitrary way in \mEdhoc{}
 (see Section~\ref{sec:errorHandling}).
 %
-We now elaborate on some considerations that the application developers 
-need to
+We now elaborate on some considerations that the application developers need to
 take into account.
 %
 
@@ -344,17 +334,14 @@ elliptic curve points lie on the chosen curve.
 Additionally, execution may require the responder to obtain and verify
 certificate chains.
 %
-For example, the content of the \mADone{} information element may need 
-the
+For example, the content of the \mADone{} information element may need the
 responder to take further action.
 %
-Since \mEdhoc{} is designed for constrained devices, this asymmetry needs to 
-be
+Since \mEdhoc{} is designed for constrained devices, this asymmetry needs to be
 considered even more carefully than for IKEv2~\cite{rfc8019}.
 %
 
-The asymmetry between the adversary's effort towards the first message and 
-that
+The asymmetry between the adversary's effort towards the first message and that
 of the responder may hence be significant and the possibility for applications
 to select which entity acts as initiator and which acts as responder may
 important.
@@ -362,18 +349,15 @@ important.
 \mEdhoc{} is profiled to work in conjunction with \mCoap{} and
 \mOscore{}~\cite{ietf-core-oscore-edhoc-03}.
 %
-The profiling locks the \mEdhoc{} initiator role to the \mCoap{} client role 
-and
-hence reduces the possibilities to change the \mEdhoc{} roles according to 
-DoS
+The profiling locks the \mEdhoc{} initiator role to the \mCoap{} client role and
+hence reduces the possibilities to change the \mEdhoc{} roles according to DoS
 vulnerability preferences.
 %
 
 Reflection attacks are another risk.
 %
 These are attacks where an adversary spoofs the source address of a victim in a
-message and thereby tricks the responder into sending a message to the 
-victim.
+message and thereby tricks the responder into sending a message to the victim.
 %
 \mEdhoc{} suggests using a return path reachability method similar to IKEv2.
 %
@@ -385,20 +369,16 @@ requests be
 discarded, limiting the effects of anonymous DoS attacks.
 %
 In situations where the responder does not need to perform additional
-communications to verify certificates etc, a reachability mechanism may be 
-more
-expensive in terms of time and storage compared to continuing with the 
-protocol
+communications to verify certificates etc, a reachability mechanism may be more
+expensive in terms of time and storage compared to continuing with the protocol
 while keeping a half-open state for a period of time.
 %
 However, if round-trip times are large, and half-open states hence are kept by
-the receiver for a long time, a reachability mechanism can trade 
-communication
+the receiver for a long time, a reachability mechanism can trade communication
 for storage.
 %
 
-\mEdhoc{} responders querying external servers for certificate revocation 
-checks
+\mEdhoc{} responders querying external servers for certificate revocation checks
 or lookups may casue systems-level issues if many distributed \mEdhoc{}
 responders frequently queries such servers when DoSed by clients.
 %
@@ -406,8 +386,7 @@ responders frequently queries such servers when DoSed by clients.
 An adversary may also send forged error messages (see
 Section~\ref{sec:errorHandling}), and specifically reject proposed ciphersuites.
 %
-The \mEdhoc{} \mSpec{} recommends the initiator to not try that ciphersuite 
-with
+The \mEdhoc{} \mSpec{} recommends the initiator to not try that ciphersuite with
 the responder again in a new session.
 %
 If the adversary rejects all options for an initiator this way, it can prevent
@@ -421,8 +400,7 @@ altogether this way.
 %------------------------------------------------------------------------- sub
 \subsection{Unclear Security Model}
 In addition to unclear contexts in which
-\mEdhoc{} can be used, the \mSpec{} also does not provide enough detail 
-about
+\mEdhoc{} can be used, the \mSpec{} also does not provide enough detail about
 adversary capabilities.
 %
 The four different cryptographic cores included in \mEdhoc{} are based on
@@ -430,17 +408,13 @@ academic protocols which are designed to work with highly specific but
 potentially different adversary models.
 %
 %For example, \mOptls{}, which essentially has the same core as \mStat{}, is
-%shown to be secure in the CK model~\cite{DBLP:conf/crypto/CanettiK02}, 
-%which
-%explicitly separates long-term key storage from that of the ephemeral keys 
-%and
+%shown to be secure in the CK model~\cite{DBLP:conf/crypto/CanettiK02}, which
+%explicitly separates long-term key storage from that of the ephemeral keys and
 %session state.
 %%
 %This fits in well with our use of TEEs.
-Since \mSigma{} cannot protect against compromised ephemeral keys, the 
-authors
-of \mEdhoc{} felt that considering the compromise of ephemeral keys 
-separately
+Since \mSigma{} cannot protect against compromised ephemeral keys, the authors
+of \mEdhoc{} felt that considering the compromise of ephemeral keys separately
 from that of long-term keys was not required~\cite{personalCommunication}.
 %
 The reason was presumably based on the fact that the \mSigSig{} method was
@@ -448,20 +422,16 @@ modeled closely on the \mSigmaI{} variant of \mSigma{}, and that it would be
 preferable to obtain a homogeneous security level among the \mEdhoc{}
 methods.~\cite{Norr21}
 %
-However, this only holds true for situations where one is only interested in 
-the
+However, this only holds true for situations where one is only interested in the
 session key confidentiality for an ongoing session.
 %
-Secure modules, in addition to being able to store long-term keys, are useful 
-in
+Secure modules, in addition to being able to store long-term keys, are useful in
 other ways too.
 %
-They also provide weak Post-Compromise Security (PCS) guarantees as 
-discussed
+They also provide weak Post-Compromise Security (PCS) guarantees as discussed
 above.
 %
-Upon discussion with the authors, they included recommendations on how to 
-store
+Upon discussion with the authors, they included recommendations on how to store
 long-term keys, and how to perform operations on these keys inside a secure
 module.
 %
@@ -476,12 +446,10 @@ session keys.
 This key material is directly influenced by \mGxy{} and a party's secret static
 long-term key, if they use \mStat{}.
 %
-As mentioned earlier, mutual explicit injective agreement cannot be obtained 
-for
+As mentioned earlier, mutual explicit injective agreement cannot be obtained for
 $P_{I}$.
 %
-This might prove to be a problem, and we proposed three potential 
-alternatives
+This might prove to be a problem, and we proposed three potential alternatives
 for addressing this to the \mEdhoc{} authors.
 %
 \begin{itemize}
@@ -618,22 +586,19 @@ the methods are secure under composition.
 In this work, we have analyzed the \mEdhoc{} specification as of July
 2020~\cite{our-analysis-selander-lake-edhoc-00}.
 %
-While our formal analysis applies to at least the version from February 2021, there are newer versions.
+While our formal analysis applies to v5 of the \mSpec{} (February 2021),
+there are newer versions.
 %
-The latest version is from July 2022~\cite{draft-ietf-lake-edhoc-15}, which, among other things, changes the key derivation function.
+The latest version at the time of writing is
+v15 (July 2022)~\cite{draft-ietf-lake-edhoc-15}, which, among other things,
+differ from v5 in terms of some inputs to the key derivations.
 %
-However, we do refer to various aspects (error handling, denial of service etc) of this latest version, in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
-
+However, we do refer to various aspects
+(error handling, denial of service etc) of this latest version,
+in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 %
-
-\knote{we 
-%are already citing too many different versions, so I don't think we
-    should add this to the bib. Potentially, we should tomorrow instead remove
-    and just mention some of the later versions.}
-\vnote{We do need to cite the latest one, just so people can look it up. It would 
-be more sensible to remove the citation for the one from February 2021, and 
-instead be more concrete about which version of EDHOC is the latest one that 
-our formal analysis applies to.}
+Due to lack of time we unfortunately could not bring the Tamarin model up to
+date with v15~\cite{draft-ietf-lake-edhoc-15}.
 %
 
 %-------------------------------------------------------------------------- ack
