@@ -580,7 +580,7 @@ lemma authInjAgreeGuaranteeForI:
                      ExpCommitI(tidIp, up, vp, expSk, agreed)@t1p ==> #t1p = #t2)
               )
             | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
-	    | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
+            | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
             )
         )
     "
@@ -595,7 +595,7 @@ lemma authInjAgreeGuaranteeForR:
                      CommitR(tidRp, up, vp, sk, agreed)@t1p ==> #t1p = #t2)
                )
              | (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
-	     | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
+             | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
              )
          )
     "
@@ -684,7 +684,7 @@ lemma authImplicitAuthGuaranteeForR:
  *  - LTKRev(I, R) only allowed *after* completed run.
  *  - EphKeyRev(I, R) *not* alloweed
  */
-lemma secrecyPFS:
+lemma secrecyPCS:
    all-traces
    "All u v sk tid #t3 #t2. (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
