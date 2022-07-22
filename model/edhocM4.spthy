@@ -98,23 +98,19 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
          plainText2 = <$V, authV>
 
          /* Chose one of the following three encryption methods */
-         /* FIXME: make this selectable via a flag so we can show the lemmas
-          *        with the strongest encryption notion for each lemma.
-          */
-
 	 ifelse(<!FULL!>, m4XOR,<!
-         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+         /* FULL: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
           */
          K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
          K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
          CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2> !> , <!
 	 ifelse(<!SIMPLE!>, m4XOR, <!
-         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+         /* SIMPLE: XOR encryption with one term XORed on the entire plaintext tuple
           */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = plainText2 XOR K_2e !> , <!
-         /* C: no XOR, regular DY encryption */
+         /* ENC: no XOR, regular DY encryption */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = senc{plainText2}K_2e !> ) !> )
         !>
@@ -202,23 +198,19 @@ ifelse(<!PSK_PSK!>, m4METHODIR,
          )
 
          /* Chose one of the following three encryption methods */
-         /* FIXME: make this selectable via a flag so we can show the lemmas
-          *        with the strongest encryption notion for each lemma.
-          */
-
 	 ifelse(<!FULL!>, m4XOR, <!
-         /* A: Full XOR encryption; works for all lemmas except auth lemmas
+         /* FULL: Full XOR encryption; works for all lemmas except auth lemmas
           *  where responder uses STAT.
           */
    	 K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
          K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
          CIPHERTEXT_2 = <$V XOR K_2e_1, authR XOR K_2e_2> !> , <!
 	 ifelse(<!SIMPLE!>, m4XOR, <!
-         /* B: XOR encryption with one term XORed on the entire plaintext tuple
+         /* SIMPLE: XOR encryption with one term XORed on the entire plaintext tuple
           */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = plainText2 XOR K_2e !> , <!
-         /* C: no XOR, regular DY encryption */
+         /* ENC: no XOR, regular DY encryption */
          K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
          CIPHERTEXT_2 = senc{plainText2}K_2e !> ) !> )
 
@@ -588,7 +580,7 @@ lemma authInjAgreeGuaranteeForI:
                      ExpCommitI(tidIp, up, vp, expSk, agreed)@t1p ==> #t1p = #t2)
               )
             | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
-	    | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & (t0 < k & k < t2))
+            | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & (t0 < k & k < t2))
             )
         )
     "
@@ -603,7 +595,7 @@ lemma authInjAgreeGuaranteeForR:
                      CommitR(tidRp, up, vp, sk, agreed)@t1p ==> #t1p = #t2)
                )
              | (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
-	     | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & (t0 < k & k < t2))
+             | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & (t0 < k & k < t2))
              )
          )
     "
@@ -692,7 +684,7 @@ lemma authImplicitAuthGuaranteeForR:
  *  - LTKRev(I, R) only allowed *after* completed run.
  *  - EphKeyRev(I, R) *not* alloweed
  */
-lemma secrecyPFS:
+lemma secrecyPCS:
    all-traces
    "All u v sk tid #t3 #t2. (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)

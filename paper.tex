@@ -1,11 +1,14 @@
+% !TEX TS-program = pdflatexmk
+
 % This is samplepaper.tex, a sample chapter demonstrating the
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.21 of 2022/01/12
 %
 \documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
 
 \usepackage{epsfig}
-\usepackage{subcaption}
+%\usepackage{subcaption}
 \usepackage{calc}
 \usepackage{amssymb}
 \usepackage{amstext}
@@ -20,7 +23,8 @@
 \usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{trees,snakes,arrows}
+%\usetikzlibrary{trees,snakes,arrows}
+\usetikzlibrary{trees,arrows}
 \usetikzlibrary{shapes,chains}
 \usetikzlibrary{positioning}
 \usepackage{hyperref}
@@ -32,32 +36,60 @@
 }
 \usepackage[nospace]{cite}
 
+
 \input{macros}
 
-\title{Formal Analysis of EDHOC Key Establishment for Constrained IoT Devices}
+\begin{document}
+\title{Extended Formal Analysis of the EDHOC Protocol in Tamarin}
 \author{
-        Karl Norrman and 
-        Vaishnavi Sundararajan and
-        Alessandro Bruni
+    Karl Norrman\inst{1,2}\orcidID{0000-0003-0164-1478} \and
+    Vaishnavi Sundararajan\inst{3} \and
+    Alessandro Bruni\inst{4}
+}
+\authorrunning{Norrman, Sundararajan and Bruni}
+\institute{
+    KTH Royal Institute of Technology, Stockholm, Sweden \and
+    Ericsson Research, Security, Stockholm, Sweden\\
+    \email{karl.norrman@ericsson.com} \and
+    University of California Santa Cruz, USA\\
+    \email{vasundar@ucsc.edu} \and
+    IT University of Copenhagen, Copenhagen, Denmark\\
+    \email{brun@itu.dk}
 }
 
-\begin{document}
 \maketitle
 %
+
 \begin{abstract}
-Given how common IoT devices that use constrained resources are becoming today, the need of the hour is communication protocols which can operate securely under such limitations.
+Given how common IoT devices that use constrained resources are becoming 
+today, the need of the hour is communication protocols which can operate 
+securely under such limitations.
 %
-For a few years, the Internet Engineering Task Force (IETF) has been working to standardize \mEdhoc{}, an authenticated key establishment protocol for such constrained IoT devices.
+For a few years, the Internet Engineering Task Force (IETF) has been working 
+to standardize \mEdhoc{}, an authenticated key establishment protocol for 
+such constrained IoT devices.
 %
 The first version of \mEdhoc{} was proposed in 2016.
 %
-In 2018, Bruni et al~\cite{DBLP:conf/secsr/BruniJPS18} used the \mProverif{} tool~\cite{DBLP:conf/csfw/Blanchet01} to formally analyze an early version of \mEdhoc{}, which had only two key establishment methods.  
+In 2018, Bruni et al.~\cite{DBLP:conf/secsr/BruniJPS18} used the \mProverif{} 
+tool~\cite{DBLP:conf/csfw/Blanchet01} to formally analyze an early version of 
+\mEdhoc{}, which had only two key establishment methods.  
 %
-%By now, the protocol has been fleshed out much more, and has been augmented with multiple new key establishment methods.
-By 2021, the protocol had been fleshed out much more, with multiple new key establishment methods, and this version was formally analyzed using the \mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13} in~\cite{Norr21}.
+%By now, the protocol has been fleshed out much more, and has been 
+%augmented with multiple new key establishment methods.
+By 2021, the protocol had been fleshed out much more, with multiple new key 
+establishment methods, and this version was formally analyzed using the 
+\mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13} in~\cite{Norr21}.
 %
-Here, we build on this work, and use \mTamarin{} to formally analyze the key establishment methods in the current version of \mEdhoc{}, as well as discuss some ramifications of the choices made while designing the protocol.
-\vnote{We need to see what more we can say here, about the new stuff we're potentially adding}
+Here, we build on this work, by modifying the model, adding new properties 
+that we analyze, and discussing some of the aspects of the latest \mEdhoc{} 
+specification. In particular, we extend the modelling with trusted execution 
+environments (TEEs), modify the way we model \mXor{} encryption, and 
+verify weak post-compromise security (PCS) as well as the secrecy and 
+integrity of some additional data used as part of the protocol.
+\keywords{Formal Verification, Symbolic Dolev-Yao Model,
+           Authenticated Key Establishment, Protocols, IoT, Tamarin.}
+
 \end{abstract}
 %
 %-------------------------------------------------------------------------- sec
@@ -78,64 +110,100 @@ Here, we build on this work, and use \mTamarin{} to formally analyze the key est
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Error handling}}
 \label{sec:errorHandling}
-Section 6 of the current \mEdhoc{} specification~\cite{draft-ietf-lake-edhoc-15} states that error messages can be sent at any time and by any party.
+Section 6 of the current \mEdhoc{} 
+specification~\cite{draft-ietf-lake-edhoc-15} 
+states that error messages can be sent at any time and by any party.
 %
-There are three types of error messages: type 0 is used to represent success, type 1 represents a generic error message used for debugging purposes, and type 2 represents the failure to negotiate a common ciphersuite. 
+There are three types of error messages: type 0 is used to represent success, 
+type 1 represents a generic error message used for debugging purposes, and 
+type 2 represents the failure to negotiate a common ciphersuite. 
 %
 Type 2 messages carry a list of supported ciphersuites by the responder.
 %
-The contents and semantics of type 1 messages are dependent on the implementation.
+The contents and semantics of type 1 messages are dependent on the 
+implementation.
 %
-Consequently, type 1 error messages provide a generic message passing mechanism, albeit without a predefined semantics.
+Consequently, type 1 error messages provide a generic message passing 
+mechanism, albeit without a predefined semantics.
 %
 We now discuss some issues with this specification of error messages.
+%
+In this section, we use ``specification'' to mean the latest specification, as 
+in~\cite{draft-ietf-lake-edhoc-15}.
 
 \subsection{Lack of connection identifiers}
-Error messages do not include the optional connection identifiers \mCi{} or \mCr{}.
+Error messages do not include the optional connection identifiers \mCi{} or 
+\mCr{}.
 %
-This is potentially problematic for connection-less transport layers, where these identifiers may be used to correlate messages.
+This is potentially problematic for connection-less transport layers, where 
+these identifiers may be used to correlate messages.
 
 \subsection{Improper handling}
-\mEdhoc{} provides an error message mechanism, but little to no guidance on how it should be used safely.
+\mEdhoc{} provides an error message mechanism, but little to no guidance on 
+how it should be used safely.
 %
-For example, assume that an application using \mEdhoc{} logs error messages on a finite log with rotation.
+For example, assume that an application using \mEdhoc{} logs error messages 
+on a finite log with rotation.
 %
-If the log is used for anomaly detection or detection of sensitive events, then an adversary can simply inject error messages and fill the log until the sensitive event is overwritten.
+If the log is used for anomaly detection or detection of sensitive events, then 
+an adversary can simply inject error messages and fill the log until the 
+sensitive event is overwritten.
 %
-In such situations, implementors should do proper log-separation and log management.
+In such situations, implementors should do proper log-separation and log 
+management.
 
 \subsection{Unspecified semantics for debugging messages}
-Section 6.2 gives an example of sending a type 1 error message with the information string "Method not supported".
+Section 6.2 gives an example of sending a type 1 error message with the 
+information string ``Method not supported".
 %
-Note that \mEdhoc{} does not include a mechanism to support the negotiating of the connection method.
+Note that \mEdhoc{} does not include a mechanism to support the 
+negotiating of the connection method.
 %
-The initiator selects the method as part of the first message, and if the responder replies with a type 1 error message along with the information string "Method not supported", the standard does not tell an implementation how to act upon this information string for negotiation purposes.
+The initiator selects the method as part of the first message, and if the 
+responder replies with a type 1 error message along with the information 
+string ``Method not supported", the standard does not tell an 
+implementation how to act upon this information string for negotiation 
+purposes.
 %
-An adversary can fake an error message, and there is no algorithm that is specified to ensure that a common available authentication mechanism is always selected.
+An adversary can fake an error message, and there is no algorithm that is 
+specified to ensure that a common available authentication mechanism is 
+always selected.
 %
-In particular, note that Section 5.1 in the specification states that if processing fails for some reason, then "typically" an error message is sent, processing is terminated and protocol state is discarded. 
+In particular, note that Section 5.1 in the specification states that if processing 
+fails for some reason, then ``typically" an error message is sent, processing is 
+terminated and protocol state is discarded. 
 %
 But negotiation needs us to remember state.
 
-With respect to ciphersuite negotiation, Section 5.2.2 of the specification also states ``The Initiator MUST NOT change the supported cipher suites and
+With respect to ciphersuite negotiation, Section 5.2.2 of the specification also 
+states ``The Initiator MUST NOT change the supported cipher suites and
 the order of preference in SUITES\_I based on previous error messages.'' 
 %
-However, \mSuites is sent in the clear, and therefore can be modified by the adversary.
+However, \mSuites is sent in the clear, and therefore can be modified by the 
+adversary.
 %
-It is important to consider what happens if the order of preference in \mSuites is changed either by the adversary, or by the initiator themselves for some other reason.
+It is important to consider what happens if the order of preference in 
+\mSuites{} is changed either by the adversary, or by the initiator themselves 
+for some other reason.
 %
-It might be helpful to include a flag in \mMsgone to indicate to the responder that a (modified) ciphersuite ordering depends on that from a previous execution.
+It might be helpful to include a flag in \mMsgone{} to indicate to the 
+responder
+that a (modified) ciphersuite ordering depends on that from a previous
+execution.
 
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Improvements to the specification}}
 \label{sec:discussion}
-The \mEdhoc{} \mSpec{} has many points where it can be improved. 
+The \mEdhoc{} \mSpec{} has many points where it can be improved.
 %
-We discovered a few of these issues in~\cite{Norr21}, but in this work, we also discuss a couple of new issues.
+We discovered a few of these issues in~\cite{Norr21}, but in this work,
+we also discuss a couple of new issues.
 %
-We communicated the points discussed in~\cite{Norr21} to the authors of the \mSpec{}.
+We communicated the points discussed in~\cite{Norr21} to the authors of the
+\mSpec{}.
 %
-Here we also list the protocol developers' response to being told of these ambiguities in the \mSpec{}.
+Here, we also list the protocol developers' response (if any) to being told of these
+ambiguities in the \mSpec{}.
 
 %-------------------------------------------------------------------------- sub
 \subsection{Unclear Intended Use}
@@ -143,167 +211,276 @@ Here we also list the protocol developers' response to being told of these ambig
 %
 There are several security goals listed in the \mSpec{}.
 %
-However, these goals are informal, and imprecisely specified, and the lack of intended usage makes them difficult to interpret as well.
+However, these goals are informal and imprecisely specified, and the lack of
+intended usage makes them difficult to interpret.
 %
-Since we have no indication about the use cases in which \mEdhoc{} can be employed, it becomes tough to evaluate if the listed security goals are the ones that we need the protocol to satisfy.
+Since we have little indication about use case restrictions, it is also hard
+to evaluate whether the security goals are the most relevant ones.
+%
 
-The overarching goal of \mEdhoc{} is to establish a security context for \mOscore{} using as few roundtrips and as small messages as possible, which dictates the design of the protocol.
+In order to identify security goals that might be relevant
+we made up some user stories corresponding to typical use cases,
+which helped us identify some subtle points of concern in \mEdhoc.
 %
-However, \mEdhoc{} might be intended for multiple use cases, some of which might not even be covered in the \mSpec{}, which might need different guarantees from the ones mentioned therein.
+We communicated these points to the authors of \mEdhoc{}.
 %
-In order to identify security goals that might apply to multiple such cases, we made up some user stories corresponding to typical use cases, which helped us identify some subtle points of concern in \mEdhoc.
-%
-We communicated these issues to the authors of \mEdhoc{}.
-%
-\vnote{Add responses from the developers to these questions}
 
+%----------------------------------------------------------------------- subsub
 \subsubsection{Non-Repudiation.}
-Access control mechanisms can vary depending on what the underlying application is.
+Access control mechanisms can vary depending on what the underlying 
+application
+is.
 %
-A nuclear power-plant might need to keep track of who enters and leaves, but a coffee machine that logs every user and their coffee preference might lead to a privacy concern.
+A nuclear power-plant might need to keep track of who enters and leaves, but 
+a
+coffee machine that logs every user and their coffee preference might lead to a
+privacy concern.
 %
-This thought experiment allowed us to perceive that the \mEdhoc{} \mSpec{} did not even consider non-repudiation.
+This simple thought experiment allowed us to identify that the \mEdhoc{}
+\mSpec{} did not even consider non-repudiation.
 %
-When we pointed this out to the authors of the \mSpec, they recognized this concern, and added a discussion about how the various \mEdhoc{} methods satisfy (or not) non-repudiation.
+When we pointed this out to the authors of the \mSpec, they recognized this
+concern, and added a discussion about how the various \mEdhoc{} methods
+satisfy (or not) non-repudiation.
+%
 
+%----------------------------------------------------------------------- subsub
 \subsubsection{Unintended Peer Authentication.}
 \label{sec:unintendedPeerAuth}
-In Section~3.2 in the \mSpec{}, the authors state that parties executing \mEdhoc{} must be configured such that they only run \mEdhoc{} with a restricted (according to some reasonable policy) set of peers.
+In Section~3.2 in the \mSpec{}, the authors state that parties executing
+\mEdhoc{} must be configured such that they only run \mEdhoc{} with a
+restricted (according to some reasonable policy) set of peers.
 %
-However, \mIdcredr{} in the second message is sent in the clear, and can therefore lead to some masquerade attacks by the adversary.
+However, the responsibilities of verifying which identity was authenticated is
+not clearly split between the application and \mEdhoc{} and therefore an attack
+similar in effect to UKS is possible.
 %
 
-Suppose a person configures the restriction policy such that every device in their home is allowed to set up an \mEdhoc{} session with any other device in the home.
+Suppose a person configures the restriction policy such that every device in
+their home is allowed to set up an \mEdhoc{} session with any other device in
+the home.
 %
-However, the adversary has managed to gain control of one of these devices (say $A$).
+However, the adversary has managed to gain control of one of these devices (say
+$A$).
 %
-Device $A$ is part of the allowed group of devices, so $B$ will accept an \mEdhoc{} run with $A$, even though $A$ is now compromised.
+Device $A$ is part of the allowed group of devices, so $B$ will accept an
+\mEdhoc{} run with $A$, even though $A$ is now compromised.
 %
-In addition, since $B$ does not explicitly check to see if the \mIdcredr{} received in the second message corresponds to the intended identity, it leads to attacks where $B$ wants to talk to another non-compromised home device $C$, but $A$ responds in place of $C$ and $B$ continues with the run anyway.
+If the application in $B$ tasks the \mEdhoc{} implementation to establish a
+security context with $C$, $B$ will send an initial message to $C$.
 %
-This requires the initiator to match \mIdcredr{} to the identity intended by them when they send out the first message.
+However, if $A$ responds to the initial message before $C$ can, the \mSpec{}
+does not require $B$ to verify that \mIdcredr{} matches what is expected for
+$C$.
+%
+A valid \mEdhoc{} implementation may then look up the appropriate credentials
+for $A$, complete the execution and deliver the security context to the
+application.
+%
+The application gets no indication of that the security context is shared with
+$A$ rather that $C$ as intended.
+%
+
+A straight forward check that the received \mIdcredr{} matches the expected
+identity thwarts the problem.
 %
 We included this check in our model.
 %
-We communicated this to the authors of \mEdhoc{}.
-\vnote{And what did they do about it?}
+We communicated this to the authors of \mEdhoc{}, who in the latest version of
+the \mSpec{}, added that \mEdhoc{} makes \mIdcredr{} available to the
+application, and added an appendix D listing credential validations that
+the application must take care of.
+%
 
+%----------------------------------------------------------------------- subsub
 \subsubsection{Denial of Service.}
-Denial of Service (DoS) attacks for IoT protocols are very well-studied.
+Denial of Service (DoS) attacks for IoT protocols are well-studied,
+but DoS aspects particular to \mEdhoc{} is not.
 %
-But DoS is not well documented for \mEdhoc{} in particular, since it delegates DoS handling to the application.
-%
-The \mSpec{} does not include any specific measures for countering such attacks.
+The \mSpec{} does not include any specific measures countering such
+attacks, but assumes the application takes care of it.
 
-Section 8.7 of the \mEdhoc{} specification~\footnote{draft-ietf-lake-edhoc-14} gives two recommendations for countering DoS attacks.
-\vnote{Is this the latest spec? The spec we’re analyzing? Which one?}
+Section 8.7 of the latest version of the \mEdhoc{}
+\mSpec{}~\cite{draft-ietf-lake-edhoc-15}
+gives two recommendations for countering DoS attacks.
 %
-First, \mEdhoc{} relies on lower layers to mitigate DoS, and an example of DoS countermeasures is given: checking the return address upon receipt of the first message.
+First, \mEdhoc{} relies on lower layers to mitigate DoS, and an example of DoS
+countermeasures is given: checking the return address upon receipt of the first
+message.
 %
-Second, an application may try to determine (in some way) that a seemingly valid message is in fact probably a forgery and should be ignored or cause the protocol to abort.
-
-No recommendation is given on how to minimize DoS effects stemming from the use of error messages, which can be used in a relatively arbitrary way in \mEdhoc{} (see Section~\ref{sec:errorHandling}).
-%
-We now elaborate on some considerations that the application developers needs to take into account.
-%
-
-As in the IKEv2 DDoS analysis by~\cite{rfc8019}, the responder is more vulnerable than the initiator.
-%
-The key similarity is that the initiator is allowed identity protection in the first message.
-%
-None of the elements in the first \mEdhoc{} message can be proved by the responder to be illegal, as long as the format is correct and the chosen elliptic curve points lie on the pre-chosen curve.
-%
-Additionally, execution may require the responder to obtain and verify certificate chains.
-%
-For example, the content of the \mADone{} information element may need the responder to take further action.
+Second, a recommendation is given that applications may try to determine (in
+some way) that a seemingly valid message is in fact probably a forgery and
+should be ignored or cause the protocol to abort.
 %
 
-The asymmetry between the adversary's effort towards the first message and that of the responder may hence be significant.
+No recommendation is given on how to minimize DoS effects stemming from the use
+of error messages, which can be used in a relatively arbitrary way in \mEdhoc{}
+(see Section~\ref{sec:errorHandling}).
 %
-Note that since \mEdhoc{} is to be used in conjunction with \mCoap{} and \mOscore{}, either party executing the \mCoap{} protocol might be the one playing the initiator role in \mEdhoc.
+We now elaborate on some considerations that the application developers need to
+take into account.
 %
-Since \mEdhoc{} is designed for constrained devices, this asymmetry needs to be considered even more carefully than for IKEv2~\cite{rfc8019}.
 
-
-Reflection attacks are another possibility.
+As in the IKEv2 DDoS analysis by~\cite{rfc8019}, the responder in \mEdhoc{}
+is more vulnerable than the initiator.
 %
-These are attacks where an adversary spoofs the source address of a victim in a message and thereby tricks the responder into sending a message to the victim.
+The key similarity is that the initiator enjoys identity protection in the
+first message.
+%
+None of the elements in the first \mEdhoc{} message can be proved by the
+responder to be invalid, as long as the format is correct and the chosen
+elliptic curve points lie on the chosen curve.
+%
+Additionally, execution may require the responder to obtain and verify
+certificate chains.
+%
+For example, the content of the \mADone{} information element may need the
+responder to take further action.
+%
+Since \mEdhoc{} is designed for constrained devices, this asymmetry needs to be
+considered even more carefully than for IKEv2~\cite{rfc8019}.
+%
+
+The asymmetry between the adversary's effort towards the first message and that
+of the responder may hence be significant and the possibility for applications
+to select which entity acts as initiator and which acts as responder may
+important.
+%
+\mEdhoc{} is profiled to work in conjunction with \mCoap{} and
+\mOscore{}~\cite{ietf-core-oscore-edhoc-03}.
+%
+The profiling locks the \mEdhoc{} initiator role to the \mCoap{} client role and
+hence reduces the possibilities to change the \mEdhoc{} roles according to DoS
+vulnerability preferences.
+%
+
+Reflection attacks are another risk.
+%
+These are attacks where an adversary spoofs the source address of a victim in a
+message and thereby tricks the responder into sending a message to the victim.
 %
 \mEdhoc{} suggests using a return path reachability method similar to IKEv2.
 %
-Note that even such reachability mechanisms can easily be used to make a responder send reachability requests to arbitrary addressable targets.
+Note that even such reachability mechanisms can easily be used to make a
+responder send reachability requests to arbitrary addressable targets.
 %
-However, such mechanisms might require that unsolicited reachability requests be discarded, limiting the effects of
-anonymous DoS attacks.
+However, such mechanisms might require that unsolicited reachability 
+requests be
+discarded, limiting the effects of anonymous DoS attacks.
 %
-In situations where the responder does not need to perform additional communications to verify certificates etc, a reachability mechanism may be more expensive in terms of time and storage compared to continuing with the protocol while keeping a ``half-open’’ state for a period of time.
+In situations where the responder does not need to perform additional
+communications to verify certificates etc, a reachability mechanism may be more
+expensive in terms of time and storage compared to continuing with the protocol
+while keeping a half-open state for a period of time.
 %
-The latter may cause a systems-level issue if many distributed \mEdhoc{} responders frequently request such servers.
+However, if round-trip times are large, and half-open states hence are kept by
+the receiver for a long time, a reachability mechanism can trade communication
+for storage.
 %
-However, if round-trip times are large, and half-open states hence are kept by the receiver for a long time, a reachability mechanism can trade communication for storage.
 
-An adversary may also send forged error messages (see Section~\ref{sec:errorHandling}), and specifically reject proposed ciphersuites.
+\mEdhoc{} responders querying external servers for certificate revocation checks
+or lookups may casue systems-level issues if many distributed \mEdhoc{}
+responders frequently queries such servers when DoSed by clients.
 %
-It is recommended for the initiator to not try that ciphersuite with the responder again in a new session.
+
+An adversary may also send forged error messages (see
+Section~\ref{sec:errorHandling}), and specifically reject proposed ciphersuites.
 %
-If the adversary rejects all options for a initiator this way, it can prevent
-communication between the initiator and that responder until the cache is
-cleared.
+The \mEdhoc{} \mSpec{} recommends the initiator to not try that ciphersuite with
+the responder again in a new session.
 %
-Potentially, an adversary could lock a party of a group out of communication altogether this way.
+If the adversary rejects all options for an initiator this way, it can prevent
+communication between the initiator and that responder until the initiator's
+cache is cleared.
+%
+Potentially, an adversary could lock a party of a group out of communication
+altogether this way.
 %
 
 %------------------------------------------------------------------------- sub
 \subsection{Unclear Security Model}
-In addition to unclear contexts in which \mEdhoc{} can be used, the \mSpec{} also does not provide enough detail about adversary capabilities. 
+In addition to unclear contexts in which
+\mEdhoc{} can be used, the \mSpec{} also does not provide enough detail about
+adversary capabilities.
 %
-The four different cryptographic cores included in \mEdhoc{} are based on academic protocols which are designed to work with highly specific but potentially different adversary models.
+The four different cryptographic cores included in \mEdhoc{} are based on
+academic protocols which are designed to work with highly specific but
+potentially different adversary models.
 %
-%For example, \mOptls{}, which essentially has the same core as \mStat{}, is shown to be secure in the CK model~\cite{DBLP:conf/crypto/CanettiK02}, which explicitly separates long-term key storage from that of the ephemeral keys and session state.
+%For example, \mOptls{}, which essentially has the same core as \mStat{}, is
+%shown to be secure in the CK model~\cite{DBLP:conf/crypto/CanettiK02}, which
+%explicitly separates long-term key storage from that of the ephemeral keys and
+%session state.
 %%
 %This fits in well with our use of TEEs.
-Since \mSigma{} cannot protect against compromised ephemeral keys, the authors of \mEdhoc{} felt that considering the compromise of ephemeral keys separately from that of long-term keys was not required~\cite{personalCommunication}.
+Since \mSigma{} cannot protect against compromised ephemeral keys, the authors
+of \mEdhoc{} felt that considering the compromise of ephemeral keys separately
+from that of long-term keys was not required~\cite{personalCommunication}.
 %
-The reason was presumably based on the fact that the \mSigSig{} method was modeled closely on the \mSigmaI{} variant of \mSigma{}, and that it would be preferable to obtain a homogeneous security level among the \mEdhoc{}
+The reason was presumably based on the fact that the \mSigSig{} method was
+modeled closely on the \mSigmaI{} variant of \mSigma{}, and that it would be
+preferable to obtain a homogeneous security level among the \mEdhoc{}
 methods.~\cite{Norr21}
 %
-However, this only holds true for situations where one is only interested in the session key confidentiality for an ongoing session.
+However, this only holds true for situations where one is only interested in the
+session key confidentiality for an ongoing session.
 %
-Secure modules, in addition to being able to store long-term keys, are useful in other ways too. 
+Secure modules, in addition to being able to store long-term keys, are useful in
+other ways too.
 %
-They also provide Post-Compromise Security (PCS) guarantees, for example.
+They also provide weak Post-Compromise Security (PCS) guarantees as discussed
+above.
 %
-Upon discussion with the authors, they included recommendations on how to store long-term keys, and how to perform operations on these keys inside a secure module.
-\vnote{This needs more description?}
+Upon discussion with the authors, they included recommendations on how to store
+long-term keys, and how to perform operations on these keys inside a secure
+module.
+%
+
 %-------------------------------------------------------------------------- sub
 \subsection{Session Key Material}
 \label{sec:sessionKeyMaterial}
-As we have seen, \mEdhoc{} establishes some session key material, which can be fed into the \mEdhoc{}-Exporter to derive session keys.
+As we have seen, \mEdhoc{} establishes some
+session key material, which can be fed into the \mEdhoc{}-Exporter to derive
+session keys.
 %
-This key material is directly influenced by \mGxy{} and a party's secret static long-term key, if they use \mStat{}.
+This key material is directly influenced by \mGxy{} and a party's secret static
+long-term key, if they use \mStat{}.
 %
-As mentioned earlier, mutual explicit injective agreement cannot be obtained for $P_{I}$.
+As mentioned earlier, mutual explicit injective agreement cannot be obtained for
+$P_{I}$.
 %
-This might prove to be a problem, and we propose three potential alternatives for addressing this.
+This might prove to be a problem, and we proposed three potential alternatives
+for addressing this to the \mEdhoc{} authors.
 %
 \begin{itemize}
-\item Include \mIdcredi{} or a hash thereof in the first and second messages: 
+    \item Include \mIdcredi{} or a hash thereof in the first and
+    second messages:
 %
-This increases message size and also leaks the initiator's identity.
-\item Derive session key material without using $P_{I}$: 
+    This increases message size and also leaks the initiator's identity.
 %
-This deviates from the structure of protocols like \mOptls{} from which the \mStat{}-based methods draw heavy inspiration.
+    \item Derive session key material without using $P_{I}$:
 %
-In those protocols, $P_{I}$'s presence in the computation of session key material is crucial to obtaining resistance against the compromise of the initiator's ephemeral key.
-\item Include a fourth message from the responder to the initiator which contains a MAC based on information obtained using $P_{I}$:
+    This deviates from the structure of protocols like \mOptls{} from which the
+    \mStat{}-based methods draw heavy inspiration.
 %
-While this option increases the number of messages in the protocol, the authors decided to go with this option for situations where it is necessary to provide explicit injective agreement on $P_{I}$.
+    In those protocols, $P_{I}$'s presence in the computation of session key
+    material is crucial to obtaining resistance against the compromise of the
+    initiator's ephemeral key.
+%
+    \item Include a fourth message from the
+    responder to the initiator which contains a MAC based on information
+    obtained using $P_{I}$:
 \end{itemize}
+%
+While the last option increases the number of messages in the protocol, the
+\mEdhoc{} authors decided to go with this option for situations where it is
+necessary to provide explicit injective agreement on $P_{I}$.
+%
 
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Conclusions and Future Work}}
-\label{sec:conclusions}
-\label{sec:newdrafts}
+\label{sec:conclusion}
+%\label{sec:newdrafts}
 We formally modeled all four
 methods of the \mEdhoc{} \mSpec{} using \mTamarin.
 %
@@ -320,72 +497,119 @@ method), context identifiers \mCi{} and \mCr, and cipher suites \mSuites.
 The responder in addition is ensured agreement on the initiators identity and
 $P_I$, i.e., on the set $S_F$.
 %
-Implicit agreement covers all previously mentioned parameters for both peers.
+Implicit agreement covers all previously mentioned parameters for both 
+peers.
 %
-Verification of all lemmas, including model validation lemmas, took 42 minutes
-on an Intel Core i7-6500U 2.5GHz using two cores.
+All measurements were taken on a server with 2 Intel(R) Xeon(R) Gold
+6242 CPU @ 2.80GHz with a total of 32 cores / 64 threads and reserved
+256 GiB of memory for the scheduled job (the machine has a total of
+384 GiB installed).
 %
-Mutual entity authentication, UKS- and KCI resistance can be inferred
+Time measurements are rounded to the nearest second and we report both
+the real time (time to complete the task) and user time (total CPU time
+spent for the task).
+%
+Mutual entity authentication, UKS- and KCI-resistance can be inferred
 from the verified properties.
-\knote{In Section 3.3 we say that injective agreement does \emph{not} hold for
-    all methods. It is a little contradictory to the table below where we
-    exclude $P_I$. It would be better to show it as not holding when $P_i$ is
-    included (both for consistency and for clarity).
-}
 %
-\begin{table*}[h!]
-        \centering
-        \caption{Verified properties. $S_P$ contains
-            roles, responder identity, session key material (excluding
-            $P_I$), \mCi, \mCr, and \mSuites. $S_F$ is $S_{P}$,
-            the initiator identity, and $P_I$.}
-        \label{tab:props}
-        \begin{tabular}{|l|c|c|c|c|}
-                \hline
-                & \mSigSig & \mSigStat & \mStatSig & \mStatStat \\
-                \hline
-                Injective agreement for I & $S_F$ & $S_F$ & $S_P$ & $S_P$\\
-                Injective agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                Implicit agreement for I & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                Implicit agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
-                PFS for session key material & \cm & \cm & \cm & \cm\\
-                \hline
-        \end{tabular}
-\end{table*}
-\knote{This should be extended with verification times and with TEE.
-    It should also show that when responder uses \mStat{} and \mSig{}, a
-    different XOR encryption is used.
-}
 
-Further, we identified a situation where initiators may establish an \mOscore{}
+\begin{table*}[t]
+        \centering
+          \resizebox{\textwidth}{!}{%
+            \begin{tabular}{|l|c|c|c|c|}
+            \hline
+              \textbf{Lemma $\backslash$ Method} & \textbf{SIG-SIG} & 
+\textbf{SIG-STAT} & \textbf{STAT-SIG} & \textbf{STAT-STAT}\\
+              \hline
+              \textbf{Injective agreement / I} & $S_F$ & $S_F$ & $S_P\ddagger$ & 
+$S_P\ddagger$\\
+              \textbf{Injective agreement / R} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Time (real/user)} & 0m27s / 11m17s & 9m27s / 239m49s & 
+1m21s / 35m36s & 18m16s / 499m2s\\
+              \textbf{Implicit agreement / I} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Implicit agreement / R} & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+              \textbf{Time (real/user)} & 2m37s / 65m40s & 5m28s / 131m12s 
+$\dagger$ 
+& 8m54s / 212m21s & 7m37s / 188m46s $\dagger$\\
+              \textbf{Session key secrecy} & \cm & \cm & \cm & \cm\\
+              \textbf{Time (real/user)} & 0m41s / 16m4s & 1m52s / 45m27s & 6m31s / 
+156m26s & 9m47s / 232m2s\\
+              \textbf{Secrecy of AD3} & \cm & \cm & \cm & \cm\\
+              \textbf{Integrity of AD3} & \cm & \cm & \cm & \cm\\
+              \textbf{Time (real/user)} & 1m40s / 38m57s & 5m53s / 138m43s & 
+3m35s / 85m12s & 45m6s / 1029m1s\\
+			\hline
+            \end{tabular}}\\[1em]
+          \caption{Verified properties. $S_P$ contains roles,
+            responder identity, session key material (excluding
+            $P_I$), \mCi, \mCr, and \mSuites. $S_F$ is $S_{P}$,
+            the initiator identity, and $P_I$.\\
+            $\dagger$: For SIG-STAT and STAT-STAT implicit
+            authentication using the full XOR model the verification
+            had to be abandoned at 14246m43s and 2057m47s of computation time,
+            respectively. The time reported is for verification under
+            the simplified XOR modeling of message 2.\\
+            $\ddagger$: When the initiator is using STAT mode we
+            cannot get explicit agreement on the intiator's own key
+            material, therefore in these two cases we check injective
+            agreement for all key material except $P_I$.\\
+          }
+                    \label{tab:props}
+        % \begin{tabular}{|l|c|c|c|c|}
+        %         \hline
+        %         & \mSigSig & \mSigStat & \mStatSig & \mStatStat \\
+        %         \hline
+        %         Injective agreement for I & $S_F$ & $S_F$ & $S_P$ & $S_P$\\
+        %         Injective agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         Implicit agreement for I & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         Implicit agreement for R & $S_F$ & $S_F$ & $S_F$ & $S_F$\\
+        %         PFS for session key material & \cm & \cm & \cm & \cm\\
+        %         \hline
+        % \end{tabular}
+\end{table*}
+
+Further, we identified a situation where initiators may establish an 
+\mOscore{}
 security context with a different party than the application using \mEdhoc{}
 intended, and proposed a simple mitigation.
 %
-We discussed how the IETF may extract and better define security properties to
+We discussed how the IETF may extract and better define security properties 
+to
 enable easier verification.
 
-We verified each method in isolation, and leave as future work to verify whether
+We verified each method in isolation, and leave as future work to verify 
+whether
 the methods are secure under composition.
 
-%\subsection{Newer Versions of the Specification}
-%\label{sec:newdrafts}
-In this work, we have analyzed the \mEdhoc{} version as of July
+\subsection{A Note About the Version of \mEdhoc}
+\label{sec:newdrafts}
+In this work, we have analyzed the \mEdhoc{} specification as of July
 2020~\cite{our-analysis-selander-lake-edhoc-00}.
 %
-There are newer versions, with the most recent version as
-of February 2021~\cite{latest-ietf-lake-edhoc-05}.
+While our formal analysis applies to v5 of the \mSpec{} (February 2021),
+there are newer versions.
 %
-However, the changes to the protocol over these versions are not
-particularly significant for our analysis.
+The latest version at the time of writing is
+v15 (July 2022)~\cite{draft-ietf-lake-edhoc-15}, which, among other things,
+differ from v5 in terms of some inputs to the key derivations.
+%
+However, we do refer to various aspects
+(error handling, denial of service etc) of this latest version,
+in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
+%
+Due to lack of time we unfortunately could not bring the Tamarin model up to
+date with v15~\cite{draft-ietf-lake-edhoc-15}.
 %
 
 %-------------------------------------------------------------------------- ack
 \section*{ACKNOWLEDGEMENTS}
 This work was partially supported by
-the Wallenberg AI, Autonomous Systems and Software Program (WASP) funded by
+the Wallenberg AI, Autonomous Systems and Software Program (WASP) 
+funded by
 the Knut and Alice Wallenberg Foundation.
 %
-We are grateful to G\"oran Selander, John Mattsson and Francesca Palombini for
+We are grateful to G\"oran Selander, John Mattsson and Francesca Palombini 
+for
 clarifications regarding the specification.
 %
 

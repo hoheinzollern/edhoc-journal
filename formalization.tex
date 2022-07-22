@@ -1,5 +1,4 @@
 % !TEX root = paper.tex
-\vnote{Need to rewrite this based on the new spec}
 The \mEdhoc{} \mSpec{} \cite{our-analysis-selander-lake-edhoc-00} claims
 that \mEdhoc{} satisfies many security properties, but these are imprecisely
 expressed and motivated.
@@ -8,13 +7,12 @@ In particular, there is no coherent adversary model.
 %
 It is therefore not clear in which context properties should be verified.
 %
-We resolve this by clearly specifying an adversary model, in which we can verify
+We resolve this by clearly specifying an adversary model, in which we can 
+verify
 properties.
 %
 
 \subsection{Formal Model}\label{sec:threat-model}
-\vnote{Can we add extra references here? SAPIC+ etc? Can leak session keys as well.} 
-
 As in~\cite{Norr21}, we verify \mEdhoc{} in an extended
 Dolev-Yao model~\cite{DY83}.
 %
@@ -23,18 +21,18 @@ protocols.
 %
 Messages are modelled as terms in an algebra, and the various cryptographic
 operations are assumed to be perfect, e.g., encrypted messages can only be
-decrypted with the correct key, and there are no hash collisions exist.
+decrypted with the correct key, and there are no hash collisions.
 %
 
-The adversary is assumed to be the network, and thus controls the communication
+The adversary is assumed to be in control of the communication
 channel and can see all messages being communicated as part of the protocol.
 %
 In addition, they can interact with an unbounded number of protocol sessions,
 drop, inject and modify messages at will.
 %
 
-On top of the Dolev-Yao model,~\cite{Norr21} allow the adversary two extra
-capabilities with respect to getting access to the long-term and ephemeral keys.
+On top of the standard Dolev-Yao model,~\cite{Norr21} allows the adversary to
+access the long-term and ephemeral keys.
 %
 Long-term key reveal, denoted $\mRevLTK^{t}(A)$, stands for the adversary
 gaining access to a party $A$'s long-term private key \mPriv{A} at a time point $t$.
@@ -43,41 +41,46 @@ Ephemeral key reveal, denoted $\mRevEph^{t}(A, k)$, stands for the adversary
 obtaining, at time $t$, the ephemeral private key \mPrivE{A} used by party $A$
 in a session where they establish key material $k$.
 %
-% Ephemeral keys might be stored in a less secure part of a device,
-% but long-term keys are often stored and operate within a secure model,
-% like a trusted execution environment (TEE). \vnote{Do we want to say more about TEEs here?}
-%
 Formalizing these two capabilities allows more fine-grained control
 over the access that an adversary has to these fundamentally different kinds of
 keys.
+%
+Furthermore, we extend the results from~\cite{Norr21} by strengthening the
+adversary capabilities, as detailed next.
 %
 
 %---------------------------------------------------------------------- subsub
 \subsubsection{System and Adversary Model Extensions Supporting TEE.}
 \label{sec:TEE:advModel}
 %
-We extend the adversary model of~\cite{Norr21} by allowing the adversary
-access to a TEE interface on a party of their choosing before and after the
-\mEdhoc{} session.
+We extend the adversary model of~\cite{Norr21} by introducing an interface to
+allow the adversary to use the long term key material of any party, though
+without directly accessing such key material.
 %
-This allows us to distinguish between a full compromise and a weak one, using
-the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
+This allows us to model the scenario where the adversary has gained access to
+a device, but the long term key material is protected by a trusted execution
+environment (TEE), and thus only accessible through the TEE interface.
 %
-A weak compromise is when the adversary have temporary access to the TEE.
+According to the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}, a
+protocol is considered to have \emph{weak post-compromise security}
+(Weak-PCS) if it achieves its security goals for a specific session
+even when the attacker has limited access to the long-term key material
+of the parties involved before the session starts -- through an interface 
+that maintains the key material secure but allows to run cryptographic 
+operations with it -- and full access to the key material of the parties
+involved after the end of the session, as well as access to the key material
+of all other parties.
 %
 Seen in the framework of~\cite{DBLP:conf/icics/XuZRWTZ20}, we add adversary
 capabilities corresponding to a server adversary, i.e., an adversary that
 compromises a party, learns its ephemeral keys and may temporarily access its
 TEE, but does not learn the party's long-term key.
 %
-The model of~\cite{Norr21} only captures server adversary capabilities without
-access to the TEE, via the leakage of ephemeral keys, and local adversary
-capabilities, or more specifically, a secure-world adversary with read-write
-access to the
-secure world where the long-term keys reside via the leakage of long-term keys.
+Our extension to the model of~\cite{Norr21} thus allows us to verify all the
+previous security properties under a Weak-PCS model.
 %
-Our extension allows analysis of so-called weak post-compromise security
-(PCS)~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
+Note that this attacker model is strictly more powerful than that of~\cite{Norr21},
+as it maintains all the previous attacker capabilities.
 %
 
 We split the \mEdhoc{} functionality as follows.
@@ -85,22 +88,22 @@ We split the \mEdhoc{} functionality as follows.
 The TEE contains the long-term key and allows the non-TEE parts of the
 application to perform the operations on it via its interface.
 %
-More precisely, parties using the \mSig{} authentication method use a TEE with
-an interface which accepts a message and returns the signature of that message
-using the party's private long-term key.
+More precisely, parties using the \mSig{} authentication method use a TEE 
+with an interface which accepts a message and returns the signature of that 
+message using the party's private long-term key.
 %
-A party $U$ using the \mStat{} authentication method use a TEE with an interface
-accepting a point $P$ on the curve and returning $\mDH(P,\ \mGu{})$.
+A party $U$ using the \mStat{} authentication method use a TEE with an 
+interface accepting a point $P$ on the curve and returning $\mDH(P,\ \mGu{})$.
 %
 
 The non-TEE parts implement \mEdhoc{} using this interface.
 %
-This interface requires the least functionality from the TEE, reducing the TEE's
-complexity and possibly cost of its implementation.
+This interface requires the least functionality from the TEE, reducing the 
+TEE's complexity and possibly cost of its implementation.
 %
-The functional split is suitable even for the situation where a
-constrained device has implemented only the storage of the long-term key in a
-special purpose circuit with minimal processing functionality.
+This functional split is suitable even when a constrained device has
+implemented only the storage of the long-term key in 
+a special purpose circuit with minimal processing functionality.
 %
 Since \mEdhoc{} focuses on constrained IoT devices, it seems appropriate to
 cater for this setting.
@@ -135,57 +138,60 @@ identity corresponding to the private key used, and then augmenting the
 properties with a condition that no such action fact exists from the start of
 the protocol execution and its end.
 %
-Care must be taken when specifying the start and the end.
-%
-Specifically, the start and end of the protocol run must be viewed w.r.t. the
+Care must be taken when specifying the start and the end: specifically,
+the start and end of the protocol run must be viewed w.r.t. the current
 role.
 %
 For example, the injective agreement property for the initiator in
 the \mSigSig{} method requires that the adversary does not have access to the
-TEE of the
-responder from the time of transmission of the first message until the second
-message is received by the initiator.
+TEE of the responder from the time of transmission of the first message until
+the second message is received by the initiator.
 %
 Because reception of one message and transmission of the next one at a party
 is an atomic operation, these timepoints represent the start and end of the
 protocol run from the perspective of the initiator.
 %
 
-We did not manage to get Tamarin to terminate for all lemmas and all methods
-with the added TEE extension.
+With this additional attacker capability Tamarin manages to prove
+almost all lemmas and method combinations, except for the implicit
+authentication lemmas when the responder uses the \mStat{} authentication
+method: in these two cases Tamarin did not complete the within reasonable
+time\footnote{See Table~\ref{tab:props} for all verification results and
+computation times.}.
 %
-When the responder uses the \mStat{} authentication method Tamarin did not
-complete the in a reasonable time for the authentication lemmas.
+We therefore simplified the modeling of XOR encryption of the second
+message to prove implicit authentication when the responder uses the 
+\mStat{} method.
 %
-To combat this, we simplified the modeling of XOR encryption of the second
-message for these lemmas when the responder uses \mStat{} authentication.
+More precisely, the second message encrypts two values: the responder's identity
+\verb|R| and the authentication information \verb|authR|.
 %
-More precisely, the second message contains the two values \verb|R| (the
-responder's identity) and
-\verb|authR| (the authentication information), and we generally model the
-XOR encryption by xoring each of them with their own key-stream terms.
+We model XOR encryption by xor-ing each term with their own key-stream term.
 %
-For the problematic lemmas however, we resorted to xoring the entire tuple
+However for the problematic cases we xor the entire tuple
 \verb|<R, authR>| with a single key-stream term.
 %
-Given that no attacks were identified using our original modeling, this
-simplification is intuitively not a severe restriction.
+This simplification might miss an attack on implicit authentication that is due
+to the combination of a malleable XOR encryption and access to the TEE interface.
 %
-However, it is possible that we now miss attacks on these methods
-combining properties of the two-term XOR encryption with TEE capabilities.
+However, given that no attacks were identified using our original modeling due
+to the use of XOR, nor in the current modeling for all other authentication 
+methods, we believe that this is not a severe restriction.
 %
 
-We now briefly describe \mTamarin{}, and how we model \mEdhoc{} in it here.
+Next we describe \mTamarin{}, and our modeling of \mEdhoc{}.
 %
 
 %-------------------------------------------------------------------------- sub
 \subsection{\mTamarin{}}
 \label{sec:tamarin}
 We extend the formal \mEdhoc{} model of~\cite{Norr21}, using the symbolic
-model tool \mTamarin{}~\cite{DBLP:conf/cav/MeierSCB13}, which is an interactive
+model tool \mTamarin{}~\cite{DBLP:conf/cav/MeierSCB13}, which is an 
+interactive
 tool for the formal verification of security protocols.
 %
-Protocols are modelled in \mTamarin{} as multiset rewrite rules which encode a
+Protocols are modelled in \mTamarin{} as multiset rewrite rules which encode 
+a
 transition relation.
 %
 The elements of these multisets, called facts, contribute to the global
@@ -213,7 +219,8 @@ a multiset of actions.
 %
 A sequence of actions yields a protocol execution trace.
 %
-Event types are predicates over global states generated during protocol execution.
+Event types are predicates over global states generated during protocol 
+execution.
 %
 Consider an event type $E$ and a timestamp $t$ as part of a trace.
 %
@@ -242,48 +249,57 @@ For example, to represent the fact that $E$ satisfies the reversal of
 symmetric encryption by using a decryption operation with the key,
 one can write $\textit{dec}(\textit{enc}(x, y), y) =_{E} x$.
 %
-The equational theory $E$ is fixed upfront to handle the functions supported by
+The equational theory $E$ is fixed upfront to handle the functions supported 
+by
 the term algebra, so we will omit the subscript for the rest of this paper.
 %
 
 Users can extend the default term algebra and equational theory in
-\mTamarin{} with new function symbols and unification rules for these new symbols.
+\mTamarin{} with new function symbols and unification rules for these new 
+symbols.
 %
-For example, \mEdhoc{} requires authenticated encryption, which we model using
+For example, \mEdhoc{} requires authenticated encryption, which we model 
+using
 the symbol \mT{aeadEncrypt}.
 %
 We augment \mTamarin{} with the following rule for this operation,
 which represents the fact that if the adversary knows a key \mT{k},
 a message \mT{m}, and authenticated data \mT{ad},
 and has access to an encryption algorithm \mT{ai},
-then they can obtain the message corresponding to the authenticated encryption
+then they can obtain the message corresponding to the authenticated 
+encryption
 of \mT{m} with \mT{k}~\cite{Norr21}.
 %
+{\footnotesize
 \begin{verbatim}
 [!KU(k), !KU(m), !KU(ad), !KU(ai)] --[]-> [!KU(aeadEncrypt(k, m, ad, ai))]
-\end{verbatim}
+\end{verbatim}}
 %
-We make used of \mTamarin{}'s builtin rules for other operations, like \mXor{}.
+Other than modeling authenticated encryption, we use \mTamarin{}'s builtin
+equational theories for signing, Diffie-Hellman, hashing and \mXor{}.
 %
 
-The rules modeling a Dolev-Yao adversary and the evolution of their knowledge
-as the protocol executes are built into \mTamarin.
+Tamarin has also built-in rules for modeling a Dolev-Yao adversary and the
+evolution of their knowledge as the protocol executes.
 %
-We can extend and/or modify this behavior by adding other rules as well.
+We extend the Dolev-Yao adversary model by adding other rules that increase
+the capabilities of the attacker.
 %
-To denote that the adversary has access to a message $p$ at time $t$, we use $\mK^{t}(p)$.
+To denote that the adversary has access to a message $p$ at time $t$, we use 
+$\mK^{t}(p)$.
 %
+\anote{Removed:
 This stands for the fact that as the adversary interacts with the parties
 executing the protocol, at time point $t$, the adversary can derive the
 term $p$ using the Dolev-Yao deduction rules and any additional adversary
-capabilities specified in \mTamarin.
+capabilities specified in \mTamarin.}
 %
-As an example, consider the following implication
+As an example, the following implication
 \[
     \forall t, k, k'\mLogicDot \mK^{t}(\langle k, k'\rangle)\ \rightarrow\
 \mK^{t}(k) \land \mK^{t}(k'),
 \]
-which represents the fact that if the adversary gets to know the pair of
+models that if the adversary gets to know the pair of
 keys $\langle k, k' \rangle$ at a time point $t$, then the adversary also
 knows each of those keys $k$ and $k'$ at time point $t$ as well.
 %
@@ -294,8 +310,8 @@ see~\cite{DBLP:conf/cav/MeierSCB13}.
 %-------------------------------------------------------------------------- sub
 \subsection{Model and Desired Properties}
 \label{sec:desired-properties}
-In this section, we describe how we model \mEdhoc{} and the various properties
-we want it to satisfy.
+In this section we describe our modeling of \mEdhoc{} and its desired
+security properties.
 %
 
 The party $I$ executing the initiator role considers a run of the protocol
@@ -303,14 +319,17 @@ begun as soon as it sends the first message \mMsgone{} with event type
 \mIStart, and considers the run ended once it has sent the third message
 \mMsgthree{} with event type \mIComplete.
 %
-Similarly, the responder $R$ considers a run started upon receiving \mMsgone{}
-with event type \mRStart, and finished upon receiving \mMsgthree{} with type
+Similarly, the responder $R$ considers a run started upon receiving 
+\mMsgone{}
+with event type \mRStart, and finished upon receiving \mMsgthree{} with 
+type
 \mRComplete.
 %
 
-In this work, we consider the following properties:
-perfect forward secrecy, injective agreement for both the initiator and the
-responder, and implicit agreement.
+In this work we consider the following properties: secrecy of the session key,
+injective agreement and implicit agreement of the session key material for both
+initiator and responder, and secrecy and integrity of the application data sent
+on message 3 ($\mAD_3$)
 %
 Agreement is considered on a set of parameters $S$ which also contains the
 session key material \mSessKey{}.
@@ -320,49 +339,53 @@ contents of the set $S$.
 %
 We formalize these properties as shown in Figure~\ref{fig:props}, which is
 a modified version of a figure in~\cite{Norr21}.
-\vnote{The figure changes because of TEEs}
-
 \begin{figure*}[ht]
 \begin{align*}
-    \mPredPfs \triangleq\ & \forall I, R, \mSessKey, t_2, t_3\mLogicDot
+    \mPredPcs \triangleq\ & \forall \mTID, I, R, \mSessKey, t_2, t_3\mLogicDot
     \mK^{t_3}(\mSessKey)\  \land\ 
-    (\mIComplete^{t_2}(I, R, \mSessKey)\, \lor\, \mRComplete^{t_2}(I, R, \mSessKey))
+    (\mIComplete^{t_2}(\mTID, I, R, \mSessKey)\, \lor\, \mRComplete^{t_2}(\mTID, I, R, 
+\mSessKey))
     \rightarrow\\
     &(\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)
-    \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)
-    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
-    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))
-\end{align*}
-\begin{align*}
+    \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
+    \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+%
     \mPredInjI \triangleq\ &
-    \forall I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, \mSessKey, S)
+    \forall \mTID_I, I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, 
+\mSessKey, S)
     \rightarrow\\
-    &(\exists t_1\mLogicDot \mRStart^{t_1}(R, \mSessKey, S) \land t_1 \lessdot t_2)
-    \land (\forall I' R' t_1' \mLogicDot \mIComplete^{t_1'}(I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1)
-    \ \ \lor\ \ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)
-\end{align*}
-\begin{align*}
+    &(\exists \mTID_R, t_1\mLogicDot \mRStart^{t_1}(\mTID_R, R, \mSessKey, S) \land t_1 \lessdot t_2
+    \land (\forall \mTID_I', I', R', t_1' \mLogicDot \mIComplete^{t_1'}(\mTID_I', I' , R', \mSessKey, S)
+        \rightarrow t_1' \doteq t_1))\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+%
     \mPredInjR \triangleq\ &
-    \forall I, R, \mSessKey, S, t_2\mLogicDot \mRComplete^{t_2}(I, R, \mSessKey, S)
+    \forall \mTID_R, I, R, \mSessKey, S, t_2\mLogicDot \mRComplete^{t_2}(\mTID_R, I, R, 
+\mSessKey, S)
     \rightarrow\\
-    &(\exists t_1\mLogicDot \mIStart^{t_1}(I, R, \mSessKey, S) \land t_1 \lessdot t_2)
-    \land (\forall I' R' t_1' \mLogicDot \mRComplete^{t_1'}(I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1)
-    \ \ \lor\ \ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2).
-\end{align*}
-\begin{align*}
+    &(\exists \mTID_I, t_1\mLogicDot \mIStart^{t_1}(\mTID_I, I, R, \mSessKey, S) \land t_1 \lessdot t_2
+    \land (\forall \mTID_R', I' R' t_1' \mLogicDot \mRComplete^{t_1'}(\mTID_R', I' , R', \mSessKey, S)
+        \rightarrow t_1' \doteq t_1))\\
+    &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+%
     \mPredImpI \triangleq\ &
-    \forall I, R, \mSessKey, S, t_1\mLogicDot \mIComplete^{t_1}(I, R, \mSessKey, S)
+    \forall \mTID_I, I, R, \mSessKey, S, t_1\mLogicDot \mIComplete^{t_1}(\mTID_I, I, R, \mSessKey, 
+S)
     \rightarrow\\
-      &(\forall I', R', S', t_2\mLogicDot \mRComplete^{t_2}(I', R', \mSessKey, S') \rightarrow
-             (I=I' \land R=R' \land S=S'))\\
-      &\land (\forall I', R', S', t_1'\mLogicDot
-        (\mIComplete^{t_1'}(I', R', \mSessKey, S') \rightarrow t_1' \doteq t_1
-        )\\
-      &\ \ \ \lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
+      &(\forall \mTID_R, I', R', S', t_2\mLogicDot \mRComplete^{t_2}(\mTID_R, I', R', \mSessKey, S') \rightarrow
+             (I=I' \land R=R' \land S=S')\\
+      &\ \ \land (\forall \mTID_I', I', R', S', t_1'\mLogicDot
+        \mIComplete^{t_1'}(\mTID_I', I', R', \mSessKey, S') \rightarrow t_1' \doteq t_1
+        ))\\
+    &\lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
-    \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey)).
+    \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey))\\
+    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))
 \end{align*}
 %
 \caption{Formalization of security properties and adversary model.}
@@ -371,17 +394,20 @@ a modified version of a figure in~\cite{Norr21}.
 
 
 %----------------------------------------------------------------------- PFS
-\subsubsection{Perfect Forward Secrecy (PFS).}
+\subsubsection{Secrecy of the session key material.}
 \label{sec:secrecy}
-Informally, by perfect forward secrecy, we mean that the adversary cannot
-gain access to the session key material \mSessKey{}, even if a long-term key is
-leaked after the establishment of \mSessKey{}.
+We show that the adversary cannot gain access to the session key material \mSessKey{},
+even under a weak post-compromise security model that allows the adversary limited access
+to the long-term keys of the parties involved through a secure interface before the session starts, 
+unrestricted access to the long-term keys of the involved parties after the session ends
+and of all other parties, as well as access to all other session keys.
 %
-PFS for session key material \mSessKey{} is formalized as \mPredPfs{}
+This property is formalized as \mPredPcs{}
 in Figure~\ref{fig:props}.
 %
 
-In the \mIComplete{} event, $I$ represents the identity of the initiator,
+In the \mIComplete{} event, \mTID{} represents a ``thread identifier'' for the
+current session, $I$ represents the identity of the initiator,
 and $R$ represents the identity of the party who the initiator believes is
 playing the responder role, while \mSessKey{} stands for the established
 session key material.
@@ -389,21 +415,23 @@ session key material.
 \mRComplete{} has analogous parameters; in particular, the responder $R$
 believes $I$ is the party playing the initiator role.
 %
-Intuitively, the PFS property states that an adversary obtains \mSessKey{}
-only if a party's long-term key is compromised before their run ends, if an
-ephemeral key is compromised at any time after a party's run began.
-%
-This is to hold even if the adversary has access to the TEE of either party
-before and after the protocol execution.
+Intuitively, the PCS property states that an adversary obtains \mSessKey{}
+only if one of the following conditions hold: either a party's long-term key
+is compromised before their run ends, or \mSessKey{} is directly revealed to
+the attacker, or the TEE interface for the responder is used during the current
+session for the initiator (i.e. after the initiator starts and before it
+commits), or, similarly, the TEE interface for the initiator is used during the
+current session for the responder.
 %
 The property in Figure~\ref{fig:props} is unlike the actual \mTamarin{} lemma
 in one minor way: \mTamarin's logic does not allow disjunctions to appear on
 the left-hand side of an implication inside a universally-quantified formula.
 %
 Therefore, in the \mTamarin{} code, instead of using the disjunction
-$\mIComplete^{t_2}(I, R, \mSessKey)\, \lor\,  \mRComplete^{t_2}(I, R, \mSessKey)$
-to model the fact that either party can have completed their execution, we use
-a single action parametrized by the terms $I$, $R$, and \mSessKey.
+$\mIComplete^{t_2}(\mTID, I, R, \mSessKey)\, \lor\, 
+\mRComplete^{t_2}(\mTID, I, R, \mSessKey)$
+to model the fact that either party may have completed their execution, we use
+a single action parametrized by the terms $\mTID$, $I$, $R$, and \mSessKey.
 
 %-------------------------------------------------------------------- InjAgree
 \subsubsection{Authentication Properties.}
@@ -415,7 +443,8 @@ of~\cite{DBLP:conf/csfw/Lowe97a}, and implicit agreement.
 Injective agreement can be guaranteed to either party running the protocol.
 %
 For the initiator $I$, it guarantees to $I$ that whenever $I$ believes that
-they have completed a run with $R$ as responder, then the party $R$ has indeed
+they have completed a run with $R$ as responder, then the party $R$ has 
+indeed
 executed the protocol in the role of a responder, and that this run of $I$
 uniquely corresponds to one of $R$ where the set of parameters is $S$ and
 includes, in particular, the session key material \mSessKey{}.
@@ -431,22 +460,26 @@ injective agreement (as described above) holds, or the long-term key of
 the party $R$ assumed to be playing the responder role has been
 compromised before $I$'s role finished.
 %
-The property is to hold even if the adversary has access to the TEE of party $R$
+The property should hold even if the adversary has access to the TEE of party $R$
 before and after the protocol execution.
 %
 %If the adversary has managed to compromise $R$'s long-term key, they can
 %generate any message of their liking and sign it using said key,
 %or compute a $\mathit{MAC}_{R}$ using the long-term keys \mPubE{I},
-%\mPriv{R}, and an ephemeral key pair $\langle\mPrivE{R},\ \mPubE{R}\rangle$
-%of their choice.
+%\mPriv{R}, and an ephemeral key pair $\langle\mPrivE{R},\ 
+%\mPubE{R}\rangle$
+%of 
+%their choice.
 %%
-The analogous definition holds for the responder $R$.
+An analogous definition holds for the responder $R$.
 %
 
 %------------------------------------------------------------- Implicit auth
-As part of our analysis, we found that all the \mEdhoc{} methods satisfy PFS.
+As part of our analysis, we found that all the \mEdhoc{} methods satisfy weak
+pot-compromise security.
 %
-However, this is not the case for the injective agreement property as stated above.
+However, this is not the case for the injective agreement property as stated 
+above.
 %
 Thus, we show a different property, a form of implicit agreement on the same
 set of parameters, which is guaranteed for all methods.
@@ -476,7 +509,8 @@ Note that for implicit agreement to hold for $I$, the ephemeral keys must not
 be revealed since the property relies on the fact that the intended responder
 is the only one who knows the session key material.
 %
-If the adversary has access to the ephemeral keys, they can use them along with
+If the adversary has access to the ephemeral keys, they can use them along 
+with
 the public keys of $I$ and $R$ to compute the session key material.
 %
 However, either party's long-term key can be revealed after the other
@@ -485,7 +519,8 @@ unable to compute \mGxy{}.
 %
 
 Since \mTamarin{} runs out of memory to verify this property as is,
-we split it into two lemmas -- \mPredImpI{} for $I$ for one \mPredImpR{} for $R$.
+we split it into two lemmas -- \mPredImpI{} for $I$ for one \mPredImpR{} for 
+$R$.
 %
 Figure~\ref{fig:props} contains the definition for \mPredImpI{}.
 %
@@ -503,7 +538,8 @@ following partial set $S_P$ of parameters~\cite{Norr21}:
 \begin{itemize}
     \item the roles played by itself and its peer,
     \item responder identity,
-    \item session key material (which varies depending on the \mEdhoc{} method),
+    \item session key material (which varies depending on the \mEdhoc{} 
+method),
     \item context identifiers \mCi{} and \mCr{}, and
     \item cipher suites \mSuites{}.
 \end{itemize}
@@ -512,7 +548,8 @@ following partial set $S_P$ of parameters~\cite{Norr21}:
 Due to the initiator being guaranteed identity protection under \mEdhoc{}, $I$
 cannot get explicit agreement with $R$ on the initiator's identity.
 %
-Similarly, when using the \mStat{} authentication method, $I$ does not get any
+Similarly, when using the \mStat{} authentication method, $I$ does not get 
+any
 such guarantees about $P_{I}$.
 %
 However, $I$ does get implicit agreement with $R$ about $I$'s identity and the
@@ -531,7 +568,8 @@ without being explicitly modelled and verified.
 One such property is Key-Compromise Impersonation
 (KCI)~\cite{DBLP:conf/ima/Blake-WilsonJM97}.
 %
-A KCI attack occurs when an adversary who has access to $A$'s long-term private
+A KCI attack occurs when an adversary who has access to $A$'s long-term 
+private
 key to make $A$ believe that they completed an execution with a peer $B$,
 while $B$ did not participate in said execution at all.
 %
@@ -551,7 +589,8 @@ As part of a UKS attack, a party $A$ can be made to believe that it finished
 an execution with a party $B$, but where the session key material is actually
 shared between $A$ and $C$ instead.
 %
-Again, due to the agreement on identities and session key material, any method
+Again, due to the agreement on identities and session key material, any 
+method
 that satisfies the above agreement properties also resists UKS attacks.
 %
 Overall, the agreement properties capture entity authentication,
@@ -578,28 +617,35 @@ which generates all the methods.
 As in~\cite{Norr21}, we only present the \mStatSig{} method which illustrates
 the use of two different authentication methods.
 %
-The full \mTamarin{} code for all models can be found at~\cite{edhocTamarinRepo}.
+The full \mTamarin{} code for all models can be found 
+at~\cite{edhocTamarinRepo}.
 %
 
 As mentioned in Section~\ref{sec:tamarin}, we extend the default
-equational theory of \mTamarin{} to handle various operations used in \mEdhoc.
+equational theory of \mTamarin{} to handle various operations used in 
+\mEdhoc.
 %
 Of the built-in theories, we use the ones for exclusive-or (\mXor),
 Diffie-Hellman operations, signatures (\mT{sign} and \mT{verify} operations),
-and hashing~\cite{DBLP:conf/csfw/DreierHRS18,DBLP:conf/csfw/SchmidtMCB12}.
+and 
+hashing~\cite{DBLP:conf/csfw/DreierHRS18,DBLP:conf/csfw/SchmidtMCB12}.
 %
-We augment the hashing function symbol to add an extra input, which we use to
+We 
+%augment the hashing function symbol to add an extra input, which we use 
+to
 model different hash functions.
 %
 
 In addition to these default operations, \mEdhoc{} is built over
 \mHkdfExpand, \mHkdfExtract, and the \mAead{} functions.
 %
-We represent \mHkdfExpand{} by \mT{expa} and \mHkdfExtract{} by \mT{extr}.
+We represent \mHkdfExpand{} by \mT{expa} and \mHkdfExtract{} by 
+\mT{extr}.
 %
 \mAead{} operations need us to add extra equations to the underlying theory.
 %
-A term encrypted using \mAead{} is represented by \mT{aeadEncrypt(m, k, ad, ai)},
+A term encrypted using \mAead{} is represented by \mT{aeadEncrypt(m, k, ad, 
+ai)},
 where \mT{m} is the underlying message, \mT{k} is the encrypting key,
 \mT{ad} is the additional data, and \mT{ai} is the identifier for the
 encryption algorithm.
@@ -628,17 +674,19 @@ decrypt(aeadEncrypt(m, k, ad, ai), k, ai) = m.
 %
 
 Having described how we adapt the equational theory to model \mEdhoc,
-we now move on to the modelling of the adversary model and the environment in
+we now move on to the modelling of the adversary model and the 
+environment in
 which the protocol is executed.
 %
-We extend the built-in Dolev-Yao adversary rules which are part of \mTamarin.
+We extend the built-in Dolev-Yao adversary rules which are part of 
+\mTamarin.
 %
 We use the following rules to capture the link between a party's identity and
 their long-term key pairs, in the \mSig{}- and in the \mStat{}-based methods
 respectively.
 \begin{center}
 \begin{minipage}{0.48\textwidth}
-\begin{small}
+\begin{scriptsize}
 \begin{verbatim}
 1 rule registerLTK_SIG:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
@@ -646,11 +694,11 @@ respectively.
 4         !PK_SIG($A, pk(~ltk)),
 5         Out(<$A, pk(~ltk)>)]
 \end{verbatim}
-\end{small}
+\end{scriptsize}
 \end{minipage}
 \hfill\vline\hfill
 \begin{minipage}{0.48\textwidth}
-\begin{small}
+\begin{scriptsize}
 \begin{verbatim}
 1 rule registerLTK_STAT:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
@@ -658,22 +706,26 @@ respectively.
 4         !PK_STAT($A, 'g'^~ltk),
 5         Out(<$A, 'g'^~ltk>)]
 \end{verbatim}
-\end{small}
+\end{scriptsize}
 \end{minipage}
 \end{center}
 
-Using the fact \verb|Fr(~ltk)|, \mTamarin{} creates a new term \mT{ltk} and uses
+Using the fact \verb|Fr(~ltk)|, \mTamarin{} creates a new term \mT{ltk} and 
+uses
 it to represent a secret long-term key.
 %
 Via the \verb|Out(<$A, pk(~ltk)>)| fact, \mTamarin{} puts out onto the
 communication channel the identity of the party to whom this long-term
 key belongs, along with their public key.
 %
-Since the adversary has access to the communication channel, they can pick up
+Since the adversary has access to the communication channel, they can pick 
+up
 all of this information.
 %
-The event \mT{UniqLTK} parametrized by a party's identity and their long-term
-key models the unique correspondence between those two values.
+The event \mT{UniqLTK} parametrized by a party's identity and their 
+long-term
+key 
+models the unique correspondence between those two values.
 %
 As a result, this rules out a party owning multiple long-term keys
 -- in particular, it keeps the adversary from registering long-term keys in
@@ -687,9 +739,11 @@ To model the reveal of long-term keys and ephemeral keys to an adversary,
 we use standard reveal rules and events of type \mRevLTK{} and \mRevEph,
 respectively.
 %
-It is also important to keep track of the time points at which these events occur.
+It is also important to keep track of the time points at which these events 
+occur.
 %
-Long-term keys can be revealed on registration, even before the protocol begins.
+Long-term keys can be revealed on registration, even before the protocol 
+begins.
 %
 Ephemeral keys in our model can only be revealed when a party
 completes their role, i.e., simultaneously with events of type \mIComplete{}
@@ -722,18 +776,21 @@ between \mT{R2} and \mT{R4}.
 In order to link two rules to a state fact, we use \mT{tid}, which
 is unique to the current session.
 %
-The use of these state facts can be seen in line 28 in the \mT{R2\_STAT\_SIG} rule.
+The use of these state facts can be seen in line 28 in the \mT{R2\_STAT\_SIG} 
+rule.
 %
 
 Note that we do not model any error message that $R$ might send in response
 to message \mMsgone rejecting $I$'s choice of ciphersuite and/or method.
 %
 
-As in~\cite{Norr21}, we model the \mXor{} encryption of \mT{CIPHERTEXT\_2} with
+As in~\cite{Norr21}, we model the \mXor{} encryption of 
+\mT{CIPHERTEXT\_2} with
 the key \mT{K\_2e} by allowing each part of the encrypted term to be
 separately attacked.
 %
-This means that we first expand \mT{K\_2e} to the same number of key terms as
+This means that we first expand \mT{K\_2e} to the same number of key terms 
+as
 subterms in the plaintext tuple.
 %
 This is done by applying \mHkdfExpand{} to unique inputs per subterm.
@@ -746,80 +803,55 @@ with the plaintext tuple.
 This can be seen in lines 19--22 in the code for \mT{R2\_STAT\_SIG}.
 %
 
-As we extended the model with TEEs and augmented the adversary's capabilities
+As we extended the model with TEEs and augmented the adversary's 
+capabilities
 with access to them, \mTamarin{} failed to complete in a reasonable time for
-some combination of authentication methods and security properties (see XYZ)
-\knote{add reference to discussion section on this}.
+some combination of authentication methods and security properties (see 
+Section~\ref{sec:conclusion} for a detailed discussion).
 %
-To circumvent the problem, we simplified the \mXor{} encryption to \mXor-ing a
-single term on the entire tuple for yjese cases.
+To circumvent the problem, we simplified the \mXor{} encryption to 
+\mXor-ing 
+a
+single term on the entire tuple for these cases. \\
 %
 
-{
-\bgroup
-\parindent 0pt
-\begin{minipage}{0.49\textwidth}
-\bgroup
-\parindent 0pt
+{\parindent 0pt
+\begin{minipage}{\textwidth}
 \begin{scriptsize}
 \begin{verbatim}
 1 rule R2_STAT_SIG:
 2 let
 3    agreed = <CS0, CI, ~CR>
-4    gx = `g'^xx
-5    data_2 = <`g'^~yy, CI, ~CR>
-6    m1 = <`STAT', `SIG', CS0, CI, gx>
+4    gx = 'g'^xx
+5    data_2 = <'g'^~yy, CI, ~CR>
+6    m1 = <'STAT', 'SIG', CS0, CI, gx>
 7    TH_2 = h(<$H0, m1, data_2>)
-8    prk_2e = extr(`e', gx^~yy)
+8    prk_2e = extr('e', gx^~yy)
 9    prk_3e2m = prk_2e
-10   K_2m = expa(<$cAEAD0, TH_2, `K_2m'>,
+10   K_2m = expa(<$cAEAD0, TH_2, 'K_2m'>,
 11               prk_3e2m)
 12   protected2 = $V // ID_CRED_V
 13   CRED_V = pkV
 14   extAad2 = <TH_2, CRED_V>
 15   assocData2 = <protected2, extAad2>
-16   MAC_2 = aead(`e', K_2m, assocData2,
-                  $cAEAD0)
+16   MAC_2 = aead('e', K_2m, assocData2, $cAEAD0)
 17   authV = sign(<assocData2, MAC_2>, ~ltk)
 18   plainText2 = <$V, authV>
-\end{verbatim}
-\end{scriptsize}
-\egroup
-\end{minipage}
-\begin{minipage}{0.02\textwidth}
-\end{minipage}
-\begin{minipage}{0.48\textwidth}
-\bgroup
-\parindent 0pt
-\begin{scriptsize}
-\begin{verbatim}
-19   K_2e = expa(<$cAEAD0, TH_2,
-                 `K_2e'>, prk_2e)
-20   K_2e_1 = expa(<$cAEAD0, TH_2,
-                   `K_2e', `1'>, prk_2e)
-21   K_2e_2 = expa(<$cAEAD0, TH_2,
-                   `K_2e', `2'>, prk_2e)
-22   CIPHERTEXT_2 = <$V XOR K_2e_1,
-                     authV XOR K_2e_2>
+19   K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
+20   K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
+21   K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
+22   CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
 23   m2 = <data_2, CIPHERTEXT_2>
 24   exp_sk = <gx^~yy>
 25 in
-26   [!LTK_SIG($V, ~ltk), !PK_SIG($V, pkV),
-      In(m1), Fr(~CR), Fr(~yy), Fr(~tid)]
-27   --[ExpRunningR(~tid, $V, exp_sk, agreed),
-        R2(~tid, $V, m1, m2)]->
-28   [StR2_STAT_SIG($V, ~ltk, ~yy, prk_3e2m,
-              TH_2, CIPHERTEXT_2, gx^~yy,
-              ~tid, m1, m2, agreed),
+26   [!LTK_SIG($V, ~ltk), !PK_SIG($V, pkV), In(m1), Fr(~CR), Fr(~yy), Fr(~tid)]
+27   --[ExpRunningR(~tid, $V, exp_sk, agreed), R2(~tid, $V, m1, m2)]->
+28   [StR2_STAT_SIG($V, ~ltk, ~yy, prk_3e2m, TH_2, CIPHERTEXT_2, gx^~yy, ~tid, m1, m2, agreed),
 29    Out(m2)]
 \end{verbatim}
 \end{scriptsize}
-\egroup
-\end{minipage}
-\\
-\egroup
-%
-}
+\end{minipage}}
+\vspace{5mm}
 
 As mentioned earlier, we use actions to represent parametrized events.
 %
@@ -832,10 +864,12 @@ The \mT{exp} in the name of the variable for session key material represents
 the fact that the agreement property satisfied by this key is explicit, i.e.,
 it includes $P_{I}$, as in Section~\ref{sec:agreedParams}.
 %
-We use \mT{imp\_sk} for the corresponding session key material which does not
+We use \mT{imp\_sk} for the corresponding session key material which does 
+not
 include $P_{I}$.
 %
-For the \mSigSig{} and \mSigStat{} methods, therefore, the two values are the same.
+For the \mSigSig{} and \mSigStat{} methods, therefore, the two values are the 
+same.
 %
 
 %-------------------------------------------------------------------------- sub
@@ -843,15 +877,16 @@ For the \mSigSig{} and \mSigStat{} methods, therefore, the two values are the sa
 %\label{sec:propertyFormalization}
 %The properties and adversary model we defined in
 %Section~\ref{sec:desired-properties} translate directly into \mTamarin's logic,
-%using the straightforward mapping of events to the actions emitted from the model.
+%using the straightforward mapping of events to the actions emitted from the 
+%model.
 %
 
 The properties we listed in Section~\ref{sec:desired-properties}
 translate directly into \mTamarin's logic.
 %
-We show the \mTamarin{} lemma which encodes the \mPredPfs{} property.
+We show the \mTamarin{} lemma which encodes the \mPredPcs{} property.
 %
-Other properties are formalized similarly.
+Other properties are formalized similarly. 
 %
 
 \begin{small}
