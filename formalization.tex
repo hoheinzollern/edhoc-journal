@@ -817,12 +817,7 @@ a
 single term on the entire tuple for these cases. \\
 %
 
-{
-\bgroup
-\parindent 0pt
-\begin{minipage}{0.49\textwidth}
-\bgroup
-\parindent 0pt
+\begin{minipage}{\textwidth}
 \begin{scriptsize}
 \begin{verbatim}
 1 rule R2_STAT_SIG:
@@ -840,48 +835,23 @@ single term on the entire tuple for these cases. \\
 13   CRED_V = pkV
 14   extAad2 = <TH_2, CRED_V>
 15   assocData2 = <protected2, extAad2>
-16   MAC_2 = aead(`e', K_2m, assocData2,
-                  $cAEAD0)
+16   MAC_2 = aead(`e', K_2m, assocData2, $cAEAD0)
 17   authV = sign(<assocData2, MAC_2>, ~ltk)
 18   plainText2 = <$V, authV>
-\end{verbatim}
-\end{scriptsize}
-\egroup
-\end{minipage}
-\begin{minipage}{0.02\textwidth}
-\end{minipage}
-\begin{minipage}{0.48\textwidth}
-\bgroup
-\parindent 0pt
-\begin{scriptsize}
-\begin{verbatim}
-19   K_2e = expa(<$cAEAD0, TH_2,
-                 `K_2e'>, prk_2e)
-20   K_2e_1 = expa(<$cAEAD0, TH_2,
-                   `K_2e', `1'>, prk_2e)
-21   K_2e_2 = expa(<$cAEAD0, TH_2,
-                   `K_2e', `2'>, prk_2e)
-22   CIPHERTEXT_2 = <$V XOR K_2e_1,
-                     authV XOR K_2e_2>
+19   K_2e = expa(<$cAEAD0, TH_2, `K_2e'>, prk_2e)
+20   K_2e_1 = expa(<$cAEAD0, TH_2, `K_2e', `1'>, prk_2e)
+21   K_2e_2 = expa(<$cAEAD0, TH_2, `K_2e', `2'>, prk_2e)
+22   CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
 23   m2 = <data_2, CIPHERTEXT_2>
 24   exp_sk = <gx^~yy>
 25 in
-26   [!LTK_SIG($V, ~ltk), !PK_SIG($V, pkV),
-      In(m1), Fr(~CR), Fr(~yy), Fr(~tid)]
-27   --[ExpRunningR(~tid, $V, exp_sk, agreed),
-        R2(~tid, $V, m1, m2)]->
-28   [StR2_STAT_SIG($V, ~ltk, ~yy, prk_3e2m,
-              TH_2, CIPHERTEXT_2, gx^~yy,
-              ~tid, m1, m2, agreed),
+26   [!LTK_SIG($V, ~ltk), !PK_SIG($V, pkV), In(m1), Fr(~CR), Fr(~yy), Fr(~tid)]
+27   --[ExpRunningR(~tid, $V, exp_sk, agreed), R2(~tid, $V, m1, m2)]->
+28   [StR2_STAT_SIG($V, ~ltk, ~yy, prk_3e2m, TH_2, CIPHERTEXT_2, gx^~yy, ~tid, m1, m2, agreed),
 29    Out(m2)]
 \end{verbatim}
 \end{scriptsize}
-\egroup
 \end{minipage}
-\\
-\egroup
-%
-}
 \vspace{5mm}
 
 As mentioned earlier, we use actions to represent parametrized events.
