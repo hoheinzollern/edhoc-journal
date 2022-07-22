@@ -407,7 +407,7 @@ Informally, by perfect forward secrecy, we mean that the adversary cannot
 gain access to the session key material \mSessKey{}, even if a long-term key is
 leaked after the establishment of \mSessKey{}.
 %
-PFS for session key material \mSessKey{} is formalized as \mPredPfs{}
+PFS for session key material \mSessKey{} is formalized as \mPredPcs{}
 in Figure~\ref{fig:props}.
 %
 
@@ -915,7 +915,7 @@ same.
 The properties we listed in Section~\ref{sec:desired-properties}
 translate directly into \mTamarin's logic.
 %
-We show the \mTamarin{} lemma which encodes the \mPredPfs{} property.
+We show the \mTamarin{} lemma which encodes the \mPredPcs{} property.
 %
 Other properties are formalized similarly. 
 %
