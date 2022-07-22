@@ -90,13 +90,21 @@ part of \mEdhoc{}, and the impact of \mEdhoc{} in multiple use-case scenarios.
 \label{sec:contributions}
 In this paper, we extend the work presented in~\cite{Norr21}.
 %
-We analyze the version of \mEdhoc{} as in~\cite{}.
+We formally analyze the version of \mEdhoc{} as in~\cite{}.
 %
+We formally analyze the \mEdhoc{} specification as of July
+2020~\cite{our-analysis-selander-lake-edhoc-00}.
+%
+Out formal analysis applies to v5 of the \mSpec{} (February 2021).
+%
+However, we do refer to various aspects
+(error handling, denial of service etc) of this latest version,
+in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 We extend the adversary model and \mTamarin{} system models to capture weak
 post-compromise security (PCS) and model Trusted Execution Environments
 (TEE).
 %
-We check for the following properties:
+We formally verify the following properties:
 \begin{itemize}
 \item Injective agreement
 \item Implicit agreement
