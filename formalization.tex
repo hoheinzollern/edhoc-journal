@@ -688,7 +688,7 @@ their long-term key pairs, in the \mSig{}- and in the \mStat{}-based methods
 respectively.
 \begin{center}
 \begin{minipage}{0.48\textwidth}
-\begin{small}
+\begin{scriptsize}
 \begin{verbatim}
 1 rule registerLTK_SIG:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
@@ -696,11 +696,11 @@ respectively.
 4         !PK_SIG($A, pk(~ltk)),
 5         Out(<$A, pk(~ltk)>)]
 \end{verbatim}
-\end{small}
+\end{scriptsize}
 \end{minipage}
 \hfill\vline\hfill
 \begin{minipage}{0.48\textwidth}
-\begin{small}
+\begin{scriptsize}
 \begin{verbatim}
 1 rule registerLTK_STAT:
 2    [Fr(~ltk)] --[UniqLTK($A, ~ltk)]->
@@ -708,7 +708,7 @@ respectively.
 4         !PK_STAT($A, `g'^~ltk),
 5         Out(<$A, `g'^~ltk>)]
 \end{verbatim}
-\end{small}
+\end{scriptsize}
 \end{minipage}
 \end{center}
 
@@ -823,25 +823,41 @@ single term on the entire tuple for these cases. \\
 1 rule R2_STAT_SIG:
 2 let
 3    agreed = <CS0, CI, ~CR>
-4    gx = `g'^xx
-5    data_2 = <`g'^~yy, CI, ~CR>
-6    m1 = <`STAT', `SIG', CS0, CI, gx>
+4    gx = 'g'^xx
+5    data_2 = <'g'^~yy, CI, ~CR>
+6    m1 = <'STAT', 'SIG', CS0, CI, gx>
 7    TH_2 = h(<$H0, m1, data_2>)
-8    prk_2e = extr(`e', gx^~yy)
+8    prk_2e = extr('e', gx^~yy)
 9    prk_3e2m = prk_2e
-10   K_2m = expa(<$cAEAD0, TH_2, `K_2m'>,
+10   K_2m = expa(<$cAEAD0, TH_2, 'K_2m'>,
 11               prk_3e2m)
 12   protected2 = $V // ID_CRED_V
 13   CRED_V = pkV
 14   extAad2 = <TH_2, CRED_V>
 15   assocData2 = <protected2, extAad2>
-16   MAC_2 = aead(`e', K_2m, assocData2, $cAEAD0)
+16   MAC_2 = aead('e', K_2m, assocData2,
+                  $cAEAD0)
 17   authV = sign(<assocData2, MAC_2>, ~ltk)
 18   plainText2 = <$V, authV>
-19   K_2e = expa(<$cAEAD0, TH_2, `K_2e'>, prk_2e)
-20   K_2e_1 = expa(<$cAEAD0, TH_2, `K_2e', `1'>, prk_2e)
-21   K_2e_2 = expa(<$cAEAD0, TH_2, `K_2e', `2'>, prk_2e)
-22   CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
+\end{verbatim}
+\end{scriptsize}
+\egroup
+\end{minipage}
+\begin{minipage}{0.02\textwidth}
+\end{minipage}
+\begin{minipage}{0.48\textwidth}
+\bgroup
+\parindent 0pt
+\begin{scriptsize}
+\begin{verbatim}
+19   K_2e = expa(<$cAEAD0, TH_2,
+                 'K_2e'>, prk_2e)
+20   K_2e_1 = expa(<$cAEAD0, TH_2,
+                   'K_2e', '1'>, prk_2e)
+21   K_2e_2 = expa(<$cAEAD0, TH_2,
+                   'K_2e', '2'>, prk_2e)
+22   CIPHERTEXT_2 = <$V XOR K_2e_1,
+                     authV XOR K_2e_2>
 23   m2 = <data_2, CIPHERTEXT_2>
 24   exp_sk = <gx^~yy>
 25 in
@@ -894,14 +910,14 @@ Other properties are formalized similarly.
 \begin{verbatim}
 1 lemma secrecyPFS:
 2    all-traces
-3    ``All u v sk tid #t3 #t2.
+3    ''All u v sk tid #t3 #t2.
 4        (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
 5        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
 6        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
 7        | (Ex #t1. EphKeyRev(sk)@t1)
 8        | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
 9        | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
-10       )"
+10       )''
 \end{verbatim}
 \end{small}
 %
