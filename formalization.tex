@@ -84,6 +84,9 @@ TEE, but does not learn the party's long-term key.
 Our extension to the model of~\cite{Norr21} thus allows us to verify all the
 previous security properties under a Weak-PCS model.
 %
+Note that this attacker model is strictly more powerful than that of~\cite{Norr21},
+as it maintains all the previous attacker capabilities.
+%
 
 We split the \mEdhoc{} functionality as follows.
 %
@@ -157,7 +160,9 @@ protocol run from the perspective of the initiator.
 With this additional attacker capability Tamarin manages to prove
 almost all lemmas and method combinations, except for the implicit
 authentication lemmas when the responder uses the \mStat{} authentication
-method: in these two cases Tamarin did not complete the within reasonable time.
+method: in these two cases Tamarin did not complete the within reasonable
+time\footnote{See Table~\ref{tab:props} for all verification results and
+computation times.}.
 %
 We therefore simplified the modeling of XOR encryption of the second
 message to prove implicit authentication when the responder uses the 
@@ -275,31 +280,31 @@ of \mT{m} with \mT{k}~\cite{Norr21}.
 [!KU(k), !KU(m), !KU(ad), !KU(ai)] --[]-> [!KU(aeadEncrypt(k, m, ad, ai))]
 \end{verbatim}}
 %
-We use \mTamarin{}'s builtin rules for other operations, like 
-\mXor{}.
+Other than modeling authenticated encryption, we use \mTamarin{}'s builtin
+equational theories for signing, Diffie-Hellman, hashing and \mXor{}.
 %
 
-The rules modeling a Dolev-Yao adversary and the evolution of their 
-knowledge
-as the protocol executes are built into \mTamarin.
+Tamarin has also built-in rules for modeling a Dolev-Yao adversary and the
+evolution of their knowledge as the protocol executes.
 %
-We can extend and/or modify this behavior by adding other rules as well.
+We extend the Dolev-Yao adversary model by adding other rules that increase
+the capabilities of the attacker.
 %
 To denote that the adversary has access to a message $p$ at time $t$, we use 
 $\mK^{t}(p)$.
 %
-This 
-%stands for the fact that as the adversary interacts with the parties
+\anote{Removed:
+This stands for the fact that as the adversary interacts with the parties
 executing the protocol, at time point $t$, the adversary can derive the
 term $p$ using the Dolev-Yao deduction rules and any additional adversary
-capabilities specified in \mTamarin.
+capabilities specified in \mTamarin.}
 %
-As an example, consider the following implication
+As an example, the following implication
 \[
     \forall t, k, k'\mLogicDot \mK^{t}(\langle k, k'\rangle)\ \rightarrow\
 \mK^{t}(k) \land \mK^{t}(k'),
 \]
-which represents the fact that if the adversary gets to know the pair of
+models that if the adversary gets to know the pair of
 keys $\langle k, k' \rangle$ at a time point $t$, then the adversary also
 knows each of those keys $k$ and $k'$ at time point $t$ as well.
 %
@@ -310,9 +315,8 @@ see~\cite{DBLP:conf/cav/MeierSCB13}.
 %-------------------------------------------------------------------------- sub
 \subsection{Model and Desired Properties}
 \label{sec:desired-properties}
-In this section, we describe how we model \mEdhoc{} and the various 
-properties
-we want it to satisfy.
+In this section we describe our modeling of \mEdhoc{} and its desired
+security properties.
 %
 
 The party $I$ executing the initiator role considers a run of the protocol
@@ -327,9 +331,10 @@ type
 \mRComplete.
 %
 
-In this work, we consider the following properties:
-perfect forward secrecy, injective agreement for both the initiator and the
-responder, and implicit agreement.
+In this work we consider the following properties: secrecy of the session key,
+injective agreement and implicit agreement of the session key material for both
+initiator and responder, and secrecy and integrity of the application data sent
+on message 3 ($\mAD_3$)
 %
 Agreement is considered on a set of parameters $S$ which also contains the
 session key material \mSessKey{}.
@@ -350,8 +355,8 @@ a modified version of a figure in~\cite{Norr21}.
     \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
     \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
 %
     \mPredInjI \triangleq\ &
     \forall \mTID_I, I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, 
@@ -361,7 +366,7 @@ a modified version of a figure in~\cite{Norr21}.
     \land (\forall \mTID_I', I', R', t_1' \mLogicDot \mIComplete^{t_1'}(\mTID_I', I' , R', \mSessKey, S)
         \rightarrow t_1' \doteq t_1))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
 %
     \mPredInjR \triangleq\ &
     \forall \mTID_R, I, R, \mSessKey, S, t_2\mLogicDot \mRComplete^{t_2}(\mTID_R, I, R, 
@@ -371,7 +376,7 @@ a modified version of a figure in~\cite{Norr21}.
     \land (\forall \mTID_R', I' R' t_1' \mLogicDot \mRComplete^{t_1'}(\mTID_R', I' , R', \mSessKey, S)
         \rightarrow t_1' \doteq t_1))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
 %
     \mPredImpI \triangleq\ &
     \forall \mTID_I, I, R, \mSessKey, S, t_1\mLogicDot \mIComplete^{t_1}(\mTID_I, I, R, \mSessKey, 
@@ -385,7 +390,7 @@ S)
     &\lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey))\\
-    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \lor t_1 \lessdot t_2))
+    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))
 \end{align*}
 %
 \caption{Formalization of security properties and adversary model.}
@@ -394,17 +399,20 @@ S)
 
 
 %----------------------------------------------------------------------- PFS
-\subsubsection{Perfect Forward Secrecy (PFS).}
+\subsubsection{Secrecy of the session key material.}
 \label{sec:secrecy}
-Informally, by perfect forward secrecy, we mean that the adversary cannot
-gain access to the session key material \mSessKey{}, even if a long-term key is
-leaked after the establishment of \mSessKey{}.
+We show that the adversary cannot gain access to the session key material \mSessKey{},
+even under a weak post-compromise security model that allows the adversary limited access
+to the long-term keys of the parties involved through a secure interface before the session starts, 
+unrestricted access to the long-term keys of the involved parties after the session ends
+and of all other parties, as well as access to all other session keys.
 %
-PFS for session key material \mSessKey{} is formalized as \mPredPcs{}
+This property is formalized as \mPredPcs{}
 in Figure~\ref{fig:props}.
 %
 
-In the \mIComplete{} event, $I$ represents the identity of the initiator,
+In the \mIComplete{} event, \mTID{} represents a ``thread identifier'' for the
+current session, $I$ represents the identity of the initiator,
 and $R$ represents the identity of the party who the initiator believes is
 playing the responder role, while \mSessKey{} stands for the established
 session key material.
@@ -412,22 +420,23 @@ session key material.
 \mRComplete{} has analogous parameters; in particular, the responder $R$
 believes $I$ is the party playing the initiator role.
 %
-Intuitively, the PFS property states that an adversary obtains \mSessKey{}
-only if a party's long-term key is compromised before their run ends, if an
-ephemeral key is compromised at any time after a party's run began.
-%
-This is to hold even if the adversary has access to the TEE of either party
-before and after the protocol execution.
+Intuitively, the PCS property states that an adversary obtains \mSessKey{}
+only if one of the following conditions hold: either a party's long-term key
+is compromised before their run ends, or \mSessKey{} is directly revealed to
+the attacker, or the TEE interface for the responder is used during the current
+session for the initiator (i.e. after the initiator starts and before it
+commits), or, similarly, the TEE interface for the initiator is used during the
+current session for the responder.
 %
 The property in Figure~\ref{fig:props} is unlike the actual \mTamarin{} lemma
 in one minor way: \mTamarin's logic does not allow disjunctions to appear on
 the left-hand side of an implication inside a universally-quantified formula.
 %
 Therefore, in the \mTamarin{} code, instead of using the disjunction
-$\mIComplete^{t_2}(I, R, \mSessKey)\, \lor\,  \mRComplete^{t_2}(I, R, 
-\mSessKey)$
-to model the fact that either party can have completed their execution, we use
-a single action parametrized by the terms $I$, $R$, and \mSessKey.
+$\mIComplete^{t_2}(\mTID, I, R, \mSessKey)\, \lor\, 
+\mRComplete^{t_2}(\mTID, I, R, \mSessKey)$
+to model the fact that either party may have completed their execution, we use
+a single action parametrized by the terms $\mTID$, $I$, $R$, and \mSessKey.
 
 %-------------------------------------------------------------------- InjAgree
 \subsubsection{Authentication Properties.}
@@ -456,7 +465,7 @@ injective agreement (as described above) holds, or the long-term key of
 the party $R$ assumed to be playing the responder role has been
 compromised before $I$'s role finished.
 %
-The property is to hold even if the adversary has access to the TEE of party $R$
+The property should hold even if the adversary has access to the TEE of party $R$
 before and after the protocol execution.
 %
 %If the adversary has managed to compromise $R$'s long-term key, they can
@@ -467,11 +476,12 @@ before and after the protocol execution.
 %of 
 %their choice.
 %%
-The analogous definition holds for the responder $R$.
+An analogous definition holds for the responder $R$.
 %
 
 %------------------------------------------------------------- Implicit auth
-As part of our analysis, we found that all the \mEdhoc{} methods satisfy PFS.
+As part of our analysis, we found that all the \mEdhoc{} methods satisfy weak
+pot-compromise security.
 %
 However, this is not the case for the injective agreement property as stated 
 above.
