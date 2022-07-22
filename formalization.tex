@@ -275,7 +275,7 @@ of \mT{m} with \mT{k}~\cite{Norr21}.
 [!KU(k), !KU(m), !KU(ad), !KU(ai)] --[]-> [!KU(aeadEncrypt(k, m, ad, ai))]
 \end{verbatim}}
 %
-Other than modeling authenticated encryption, we use \mTamarin{}'s builtin
+Other than modeling authenticated encryption, we use \mTamarin{}'s built-in
 equational theories for signing, Diffie-Hellman, hashing and \mXor{}.
 %
 
@@ -327,12 +327,12 @@ type
 %
 
 In this work we consider the following properties: secrecy of the session key,
-injective agreement and implicit agreement of the session key material for both
+injective agreement and implicit agreement of the session-key material for both
 initiator and responder, and secrecy and integrity of the application data sent
 on message 3 ($\mAD_3$)
 %
 Agreement is considered on a set of parameters $S$ which also contains the
-session key material \mSessKey{}.
+session-key material \mSessKey{}.
 %
 We will first describe in detail both properties, and then describe the
 contents of the set $S$.
@@ -394,23 +394,23 @@ S)
 
 
 %----------------------------------------------------------------------- PFS
-\subsubsection{Secrecy of the session key material.}
+\subsubsection{Secrecy of the Session-key Material.}
 \label{sec:secrecy}
-We show that the adversary cannot gain access to the session key material \mSessKey{},
-even under a weak post-compromise security model that allows the adversary limited access
-to the long-term keys of the parties involved through a secure interface before the session starts, 
-unrestricted access to the long-term keys of the involved parties after the session ends
-and of all other parties, as well as access to all other session keys.
+We show that the adversary cannot gain access to the session-key material
+\mSessKey{}, even under a weak post-compromise security model that allows the
+adversary limited access to the long-term keys of the parties involved through a
+secure interface before the session starts, unrestricted access to the long-term
+keys of the involved parties after the session ends and of all other parties, as
+well as access to all other session keys.
 %
-This property is formalized as \mPredPcs{}
-in Figure~\ref{fig:props}.
+This property is formalized as \mPredPcs{} in Figure~\ref{fig:props}.
 %
 
 In the \mIComplete{} event, \mTID{} represents a ``thread identifier'' for the
 current session, $I$ represents the identity of the initiator,
 and $R$ represents the identity of the party who the initiator believes is
 playing the responder role, while \mSessKey{} stands for the established
-session key material.
+session-key material.
 %
 \mRComplete{} has analogous parameters; in particular, the responder $R$
 believes $I$ is the party playing the initiator role.
@@ -419,8 +419,8 @@ Intuitively, the PCS property states that an adversary obtains \mSessKey{}
 only if one of the following conditions hold: either a party's long-term key
 is compromised before their run ends, or \mSessKey{} is directly revealed to
 the attacker, or the TEE interface for the responder is used during the current
-session for the initiator (i.e. after the initiator starts and before it
-commits), or, similarly, the TEE interface for the initiator is used during the
+session for the initiator, i.e., after the initiator starts and before it
+commits, or, similarly, the TEE interface for the initiator is used during the
 current session for the responder.
 %
 The property in Figure~\ref{fig:props} is unlike the actual \mTamarin{} lemma
@@ -428,7 +428,7 @@ in one minor way: \mTamarin's logic does not allow disjunctions to appear on
 the left-hand side of an implication inside a universally-quantified formula.
 %
 Therefore, in the \mTamarin{} code, instead of using the disjunction
-$\mIComplete^{t_2}(\mTID, I, R, \mSessKey)\, \lor\, 
+$\mIComplete^{t_2}(\mTID, I, R, \mSessKey)\, \lor\,
 \mRComplete^{t_2}(\mTID, I, R, \mSessKey)$
 to model the fact that either party may have completed their execution, we use
 a single action parametrized by the terms $\mTID$, $I$, $R$, and \mSessKey.
@@ -447,7 +447,7 @@ they have completed a run with $R$ as responder, then the party $R$ has
 indeed
 executed the protocol in the role of a responder, and that this run of $I$
 uniquely corresponds to one of $R$ where the set of parameters is $S$ and
-includes, in particular, the session key material \mSessKey{}.
+includes, in particular, the session-key material \mSessKey{}.
 %
 It can be defined for $R$ in a similar manner.
 
@@ -492,7 +492,7 @@ our definition encompasses a general set of parameters, as in the notion of
 injective agreement proposed by Lowe~\cite{DBLP:conf/csfw/Lowe97a}.
 
 The ``implicit'' in the name of the property stands for the fact that a party
-$A$ assumes that any party $B$ who has access to the session key material
+$A$ assumes that any party $B$ who has access to the session-key material
 \mSessKey{} must, in fact, be the intended party, and that if $B$ is honest,
 $B$ will agree on a set $S$ of parameters which includes \mSessKey.
 %
@@ -507,11 +507,11 @@ and $B$ agree on each other's identities and roles, and the set $S$.
 
 Note that for implicit agreement to hold for $I$, the ephemeral keys must not
 be revealed since the property relies on the fact that the intended responder
-is the only one who knows the session key material.
+is the only one who knows the session-key material.
 %
 If the adversary has access to the ephemeral keys, they can use them along 
 with
-the public keys of $I$ and $R$ to compute the session key material.
+the public keys of $I$ and $R$ to compute the session-key material.
 %
 However, either party's long-term key can be revealed after the other
 party has finished their execution, since this still leaves the adversary
@@ -538,7 +538,7 @@ following partial set $S_P$ of parameters~\cite{Norr21}:
 \begin{itemize}
     \item the roles played by itself and its peer,
     \item responder identity,
-    \item session key material (which varies depending on the \mEdhoc{} 
+    \item session-key material (which varies depending on the \mEdhoc{} 
 method),
     \item context identifiers \mCi{} and \mCr{}, and
     \item cipher suites \mSuites{}.
@@ -559,7 +559,7 @@ In contrast, since $R$'s run finishes after that of $I$, $R$ can get explicit
 injective agreement assurances on the full set $S_{F}$ of agreed parameters.
 %
 The full set of agreed parameters $S_F$ is $S_P \cup \{I, P_I\}$ when $P_I$
-is part of the session key material, and $S_P \cup \{I\}$ otherwise.
+is part of the session-key material, and $S_P \cup \{I\}$ otherwise.
 %
 
 In addition to these properties, a couple of properties can be inferred
@@ -576,7 +576,7 @@ while $B$ did not participate in said execution at all.
 This is in particular relevant when \mStat{} authentication methods are used.
 %
 Our above notions of agreement ensure that both parties agree on each
-other's identity, role, and session key material.
+other's identity, role, and session-key material.
 %
 Therefore, all \mEdhoc{} methods that satisfy these agreement properties also
 avoid KCI attacks.
@@ -586,10 +586,10 @@ Another kind of attack is Unknown Key Share attacks
 (UKS)~\cite{DBLP:conf/ima/Blake-WilsonJM97}.
 %
 As part of a UKS attack, a party $A$ can be made to believe that it finished
-an execution with a party $B$, but where the session key material is actually
+an execution with a party $B$, but where the session-key material is actually
 shared between $A$ and $C$ instead.
 %
-Again, due to the agreement on identities and session key material, any 
+Again, due to the agreement on identities and session-key material, any 
 method
 that satisfies the above agreement properties also resists UKS attacks.
 %
@@ -858,17 +858,16 @@ As mentioned earlier, we use actions to represent parametrized events.
 For example, in line 27 above, the action
 \verb|ExpRunningR(~tid, $V, exp_sk, agreed)| represents an event of type
 \mRStart{} parametrized by the session id, the responder's identity, and the
-session key material \mT{exp\_sk}.
+session-key material \mT{exp\_sk}.
 %
-The \mT{exp} in the name of the variable for session key material represents
+The \mT{exp} in the name of the variable for session-key material represents
 the fact that the agreement property satisfied by this key is explicit, i.e.,
 it includes $P_{I}$, as in Section~\ref{sec:agreedParams}.
 %
-We use \mT{imp\_sk} for the corresponding session key material which does 
-not
+We use \mT{imp\_sk} for the corresponding session-key material which does not
 include $P_{I}$.
 %
-For the \mSigSig{} and \mSigStat{} methods, therefore, the two values are the 
+For the \mSigSig{} and \mSigStat{} methods, therefore, the two values are the
 same.
 %
 
@@ -877,7 +876,7 @@ same.
 %\label{sec:propertyFormalization}
 %The properties and adversary model we defined in
 %Section~\ref{sec:desired-properties} translate directly into \mTamarin's logic,
-%using the straightforward mapping of events to the actions emitted from the 
+%using the straightforward mapping of events to the actions emitted from the
 %model.
 %
 
