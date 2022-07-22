@@ -350,8 +350,8 @@ a modified version of a figure in~\cite{Norr21}.
     \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
     \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land \mTEE^{t_1}(R) \land t_0 \lessdot t_1)\\
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land t_0 \lessdot t_1)\\[2em]
 %
     \mPredInjI \triangleq\ &
     \forall \mTID_I, I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, 
@@ -361,7 +361,7 @@ a modified version of a figure in~\cite{Norr21}.
     \land (\forall \mTID_I', I', R', t_1' \mLogicDot \mIComplete^{t_1'}(\mTID_I', I' , R', \mSessKey, S)
         \rightarrow t_1' \doteq t_1))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land t_0 \lessdot t_1)\\[2em]
 %
     \mPredInjR \triangleq\ &
     \forall \mTID_R, I, R, \mSessKey, S, t_2\mLogicDot \mRComplete^{t_2}(\mTID_R, I, R, 
@@ -371,7 +371,7 @@ a modified version of a figure in~\cite{Norr21}.
     \land (\forall \mTID_R', I' R' t_1' \mLogicDot \mRComplete^{t_1'}(\mTID_R', I' , R', \mSessKey, S)
         \rightarrow t_1' \doteq t_1))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
+    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, \mSessKey, S) \land \mTEE^{t_1}(I) \land t_0 \lessdot t_1)\\[2em]
 %
     \mPredImpI \triangleq\ &
     \forall \mTID_I, I, R, \mSessKey, S, t_1\mLogicDot \mIComplete^{t_1}(\mTID_I, I, R, \mSessKey, 
@@ -385,7 +385,7 @@ S)
     &\lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey))\\
-    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))
+    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land \mTEE^{t_1}(R) \land t_0 \lessdot t_1)
 \end{align*}
 %
 \caption{Formalization of security properties and adversary model.}
@@ -393,7 +393,7 @@ S)
 \end{figure*}
 
 
-%----------------------------------------------------------------------- PFS
+%----------------------------------------------------------------------- PCS
 \subsubsection{Secrecy of the session key material.}
 \label{sec:secrecy}
 We show that the adversary cannot gain access to the session key material \mSessKey{},
@@ -407,7 +407,8 @@ in Figure~\ref{fig:props}.
 %
 
 In the \mIComplete{} event, \mTID{} represents a ``thread identifier'' for the
-current session, $I$ represents the identity of the initiator,
+current session and is used to correlate multiple events for the same run of the 
+protocol for each party, $I$ represents the identity of the initiator,
 and $R$ represents the identity of the party who the initiator believes is
 playing the responder role, while \mSessKey{} stands for the established
 session key material.
@@ -419,9 +420,12 @@ Intuitively, the PCS property states that an adversary obtains \mSessKey{}
 only if one of the following conditions hold: either a party's long-term key
 is compromised before their run ends, or \mSessKey{} is directly revealed to
 the attacker, or the TEE interface for the responder is used during the current
-session for the initiator (i.e. after the initiator starts and before it
-commits), or, similarly, the TEE interface for the initiator is used during the
+session for the initiator (i.e. after the initiator starts), or, similarly, 
+the TEE interface for the initiator is used during the
 current session for the responder.
+%
+We use the thread identifier \mTID for each party to relate the starting event
+to the corresponding commit event.
 %
 The property in Figure~\ref{fig:props} is unlike the actual \mTamarin{} lemma
 in one minor way: \mTamarin's logic does not allow disjunctions to appear on
@@ -891,15 +895,15 @@ Other properties are formalized similarly.
 
 \begin{small}
 \begin{verbatim}
-1 lemma secrecyPFS:
+1 lemma secrecyPCS:
 2    all-traces
 3    "All u v sk tid #t3 #t2.
 4        (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
 5        ( (Ex #t1. LTKRev(u)@t1 & #t1 < #t2)
 6        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
 7        | (Ex #t1. EphKeyRev(sk)@t1)
-8        | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & (t0 < k | k < t2))
-9        | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & (t0 < k | k < t2))
+8        | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & t0 < k)
+9        | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & t0 < k)
 10       )"
 \end{verbatim}
 \end{small}
@@ -915,6 +919,6 @@ Similarly, the action \mT{EphKeyRev(sk)} in line 7 stands for the reveal of
 the ephemeral key for $I$ or $R$ or both.
 %
 Lines 8 and 9 captures that the parties TEEs must be inaccessible to the
-adversary between the start and end of the execution as seen by each party
+adversary after the start of the session as seen by each party
 respectively.
 %
