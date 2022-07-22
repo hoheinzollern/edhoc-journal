@@ -21,24 +21,21 @@ protocols.
 %
 Messages are modelled as terms in an algebra, and the various cryptographic
 operations are assumed to be perfect, e.g., encrypted messages can only be
-decrypted with the correct key, and there are no hash collisions exist.
+decrypted with the correct key, and there are no hash collisions.
 %
 
-The adversary is assumed to be the network, and thus controls the 
-communication
+The adversary is assumed to be in control of the communication
 channel and can see all messages being communicated as part of the protocol.
 %
 In addition, they can interact with an unbounded number of protocol sessions,
 drop, inject and modify messages at will.
 %
 
-On top of the Dolev-Yao model,~\cite{Norr21} allow the adversary two extra
-capabilities with respect to getting access to the long-term and ephemeral 
-keys.
+On top of the standard Dolev-Yao model,~\cite{Norr21} allows the adversary to
+access the long-term and ephemeral keys.
 %
 Long-term key reveal, denoted $\mRevLTK^{t}(A)$, stands for the adversary
-gaining access to a party $A$'s long-term private key \mPriv{A} at a time point 
-$t$.
+gaining access to a party $A$'s long-term private key \mPriv{A} at a time point $t$.
 %
 Ephemeral key reveal, denoted $\mRevEph^{t}(A, k)$, stands for the adversary
 obtaining, at time $t$, the ephemeral private key \mPrivE{A} used by party $A$
@@ -53,36 +50,39 @@ Formalizing these two capabilities allows more fine-grained control
 over the access that an adversary has to these fundamentally different kinds of
 keys.
 %
+Furthermore, we extend the results from~\cite{Norr21} by strengthening the
+adversary capabilities, as detailed next.
+%
 
 %---------------------------------------------------------------------- subsub
 \subsubsection{System and Adversary Model Extensions Supporting TEE.}
 \label{sec:TEE:advModel}
 %
-We extend the adversary model of~\cite{Norr21} by allowing the adversary
-access to a TEE interface on a party of their choosing before and after the
-\mEdhoc{} session.
+We extend the adversary model of~\cite{Norr21} by introducing an interface to
+allow the adversary to use the long term key material of any party, though
+without directly accessing such key material.
 %
-This allows us to distinguish between a full compromise and a weak one, 
-using
-the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
+This allows us to model the scenario where the adversary has gained access to
+a device, but the long term key material is protected by a trusted execution
+environment (TEE), and thus only accessible through the TEE interface.
 %
-A weak compromise is when the adversary have temporary access to the TEE.
+According to the terminology of~\cite{DBLP:conf/csfw/Cohn-GordonCG16}, a
+protocol is considered to have \emph{weak post-compromise security}
+(Weak-PCS) if it achieves its security goals for a specific session
+even when the attacker has limited access to the long-term key material
+of the parties involved before the session starts -- through an interface 
+that maintains the key material secure but allows to run cryptographic 
+operations with it -- and full access to the key material of the parties
+involved after the end of the session, as well as access to the key material
+of all other parties.
 %
-Seen in the framework of~\cite{DBLP:conf/icics/XuZRWTZ20}, we add 
-adversary
+Seen in the framework of~\cite{DBLP:conf/icics/XuZRWTZ20}, we add adversary
 capabilities corresponding to a server adversary, i.e., an adversary that
 compromises a party, learns its ephemeral keys and may temporarily access its
 TEE, but does not learn the party's long-term key.
 %
-The model of~\cite{Norr21} only captures server adversary capabilities without
-access to the TEE, via the leakage of ephemeral keys, and local adversary
-capabilities, or more specifically, a secure-world adversary with read-write
-access to the
-secure world where the long-term keys reside via the leakage of long-term 
-keys.
-%
-Our extension allows analysis of so-called weak post-compromise security
-(PCS)~\cite{DBLP:conf/csfw/Cohn-GordonCG16}.
+Our extension to the model of~\cite{Norr21} thus allows us to verify all the
+previous security properties under a Weak-PCS model.
 %
 
 We split the \mEdhoc{} functionality as follows.
@@ -91,26 +91,21 @@ The TEE contains the long-term key and allows the non-TEE parts of the
 application to perform the operations on it via its interface.
 %
 More precisely, parties using the \mSig{} authentication method use a TEE 
-with
-an interface which accepts a message and returns the signature of that 
-message
-using the party's private long-term key.
+with an interface which accepts a message and returns the signature of that 
+message using the party's private long-term key.
 %
 A party $U$ using the \mStat{} authentication method use a TEE with an 
-interface
-accepting a point $P$ on the curve and returning $\mDH(P,\ \mGu{})$.
+interface accepting a point $P$ on the curve and returning $\mDH(P,\ \mGu{})$.
 %
 
 The non-TEE parts implement \mEdhoc{} using this interface.
 %
 This interface requires the least functionality from the TEE, reducing the 
-TEE's
-complexity and possibly cost of its implementation.
+TEE's complexity and possibly cost of its implementation.
 %
-The functional split is suitable even for the situation where a
-constrained device has implemented only the storage of the long-term key in 
-a
-special purpose circuit with minimal processing functionality.
+This functional split is suitable even when a constrained device has
+implemented only the storage of the long-term key in 
+a special purpose circuit with minimal processing functionality.
 %
 Since \mEdhoc{} focuses on constrained IoT devices, it seems appropriate to
 cater for this setting.
@@ -145,49 +140,46 @@ identity corresponding to the private key used, and then augmenting the
 properties with a condition that no such action fact exists from the start of
 the protocol execution and its end.
 %
-Care must be taken when specifying the start and the end.
-%
-Specifically, the start and end of the protocol run must be viewed w.r.t. the
+Care must be taken when specifying the start and the end: specifically,
+the start and end of the protocol run must be viewed w.r.t. the current
 role.
 %
 For example, the injective agreement property for the initiator in
 the \mSigSig{} method requires that the adversary does not have access to the
-TEE of the
-responder from the time of transmission of the first message until the second
-message is received by the initiator.
+TEE of the responder from the time of transmission of the first message until
+the second message is received by the initiator.
 %
 Because reception of one message and transmission of the next one at a party
 is an atomic operation, these timepoints represent the start and end of the
 protocol run from the perspective of the initiator.
 %
 
-We did not manage to get Tamarin to terminate for all lemmas and all 
-methods
-with the added TEE extension.
+With this additional attacker capability Tamarin manages to prove
+almost all lemmas and method combinations, except for the implicit
+authentication lemmas when the responder uses the \mStat{} authentication
+method: in these two cases Tamarin did not complete the within reasonable time.
 %
-When the responder uses the \mStat{} authentication method Tamarin did not
-complete the in a reasonable time for the authentication lemmas.
+We therefore simplified the modeling of XOR encryption of the second
+message to prove implicit authentication when the responder uses the 
+\mStat{} method.
 %
-To combat this, we simplified the modeling of XOR encryption of the second
-message for these lemmas when the responder uses \mStat{} authentication.
+More precisely, the second message encrypts two values: the responder's identity
+\verb|R| and the authentication information \verb|authR|.
 %
-More precisely, the second message contains the two values \verb|R| (the
-responder's identity) and
-\verb|authR| (the authentication information), and we generally model the
-XOR encryption by xoring each of them with their own key-stream terms.
+We model XOR encryption by xor-ing each term with their own key-stream term.
 %
-For the problematic lemmas however, we resorted to xoring the entire tuple
+However for the problematic cases we xor the entire tuple
 \verb|<R, authR>| with a single key-stream term.
 %
-Given that no attacks were identified using our original modeling, this
-simplification is intuitively not a severe restriction.
+This simplification might miss an attack on implicit authentication that is due
+to the combination of a malleable XOR encryption and access to the TEE interface.
 %
-However, it is possible that we now miss attacks on these methods
-combining properties of the two-term XOR encryption with TEE capabilities.
+However, given that no attacks were identified using our original modeling due
+to the use of XOR, nor in the current modeling for all other authentication 
+methods, we believe that this is not a severe restriction.
 %
 
-We now briefly describe \mTamarin{}, and how we model \mEdhoc{} in it 
-here.
+Next we describe \mTamarin{}, and our modeling of \mEdhoc{}.
 %
 
 %-------------------------------------------------------------------------- sub
@@ -278,11 +270,12 @@ then they can obtain the message corresponding to the authenticated
 encryption
 of \mT{m} with \mT{k}~\cite{Norr21}.
 %
+{\footnotesize
 \begin{verbatim}
 [!KU(k), !KU(m), !KU(ad), !KU(ai)] --[]-> [!KU(aeadEncrypt(k, m, ad, ai))]
-\end{verbatim}
+\end{verbatim}}
 %
-We make used of \mTamarin{}'s builtin rules for other operations, like 
+We use \mTamarin{}'s builtin rules for other operations, like 
 \mXor{}.
 %
 
@@ -817,6 +810,7 @@ a
 single term on the entire tuple for these cases. \\
 %
 
+{\parindent 0pt
 \begin{minipage}{\textwidth}
 \begin{scriptsize}
 \begin{verbatim}
@@ -835,26 +829,13 @@ single term on the entire tuple for these cases. \\
 13   CRED_V = pkV
 14   extAad2 = <TH_2, CRED_V>
 15   assocData2 = <protected2, extAad2>
-16   MAC_2 = aead('e', K_2m, assocData2,
-                  $cAEAD0)
+16   MAC_2 = aead('e', K_2m, assocData2, $cAEAD0)
 17   authV = sign(<assocData2, MAC_2>, ~ltk)
 18   plainText2 = <$V, authV>
-\end{verbatim}
-\end{scriptsize}
-\end{minipage}
-\begin{minipage}{0.02\textwidth}
-\end{minipage}
-\begin{minipage}{0.48\textwidth}
-\begin{scriptsize}
-\begin{verbatim}
-19   K_2e = expa(<$cAEAD0, TH_2,
-                 'K_2e'>, prk_2e)
-20   K_2e_1 = expa(<$cAEAD0, TH_2,
-                   'K_2e', '1'>, prk_2e)
-21   K_2e_2 = expa(<$cAEAD0, TH_2,
-                   'K_2e', '2'>, prk_2e)
-22   CIPHERTEXT_2 = <$V XOR K_2e_1,
-                     authV XOR K_2e_2>
+19   K_2e = expa(<$cAEAD0, TH_2, 'K_2e'>, prk_2e)
+20   K_2e_1 = expa(<$cAEAD0, TH_2, 'K_2e', '1'>, prk_2e)
+21   K_2e_2 = expa(<$cAEAD0, TH_2, 'K_2e', '2'>, prk_2e)
+22   CIPHERTEXT_2 = <$V XOR K_2e_1, authV XOR K_2e_2>
 23   m2 = <data_2, CIPHERTEXT_2>
 24   exp_sk = <gx^~yy>
 25 in
@@ -864,7 +845,7 @@ single term on the entire tuple for these cases. \\
 29    Out(m2)]
 \end{verbatim}
 \end{scriptsize}
-\end{minipage}
+\end{minipage}}
 \vspace{5mm}
 
 As mentioned earlier, we use actions to represent parametrized events.
