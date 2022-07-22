@@ -658,7 +658,7 @@ lemma authImplicitAuthGuaranteeForI:
            )
          | (Ex #t0. LTKRev(v)@t0 & #t0 < #t1)
          | (Ex #t0. EphKeyRev(sk)@t0)
-         | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & (t0 < k & k < t1))
+         | (Ex m1 #t0 #k. I1(tidI, u, v, m1)@t0 & TEE(v)@k & t0 < k)
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
     "
@@ -677,7 +677,7 @@ lemma authImplicitAuthGuaranteeForR:
            )
          | (Ex #t0. LTKRev(u)@t0 & #t0 < #t1)
          | (Ex #t0. EphKeyRev(sk)@t0)
-         | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & (t0 < k & k < t1))
+         | (Ex m1 m2 #t0 #k. R2(tidR, v, m1, m2)@t0 & TEE(u)@k & t0 < k)
 //         | (Ex #t0. SessKeyRev(sk)@t0)
          )
     "
@@ -699,8 +699,8 @@ lemma secrecyPFS:
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
-       | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & (t0 < k & k < t2))
-       | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & (t0 < k & k < t2))
+       | (Ex m1 #t0 #k. I1(tid, u, v, m1)@t0 & TEE(v)@k & t0 < k)
+       | (Ex m1 m2 #t0 #k. R2(tid, v, m1, m2)@t0 & TEE(u)@k & t0 < k)
        )
     "
 
@@ -717,8 +717,8 @@ ifdef(<!m4AD3!>,
        | (Ex #t1. LTKRev(v)@t1 & #t1 < #t2)
        | (Ex #t1. EphKeyRev(sk)@t1)
 //       | (Ex #t1. SessKeyRev(sk)@t1)
-       | (Ex #k m1 #t0. TEE(v)@k & I1(tidI, u, v, m1)@t0 & (t0 < k | k < t2))
-       | (Ex #k tidR m1 m2 #t0 #t4. TEE(u)@k & Recv(u, v, sk, ad3, tidR)@t4 & R2(tidR, v, m1, m2)@t0 & (t0 < k & k < t4))
+       | (Ex #k m1 #t0. TEE(v)@k & I1(tidI, u, v, m1)@t0 & t0 < k)
+       | (Ex #k tidR m1 m2 #t0 #t4. TEE(u)@k & Recv(u, v, sk, ad3, tidR)@t4 & R2(tidR, v, m1, m2)@t0 & t0 < k)
        )
     )"
 lemma securityAD_3AEAD_Integrity:
@@ -730,8 +730,8 @@ lemma securityAD_3AEAD_Integrity:
              | (Ex #t2. LTKRev(v)@t2 & #t2 < #t3)
              | (Ex #t2. EphKeyRev(sk)@t2)
 //             | (Ex #t2. SessKeyRev(sk)@t2)
-             | (Ex #k tidI m1 #t0 #t2. TEE(v)@k & Send(u, v, sk, ad3, tidI)@t2 & I1(tidI, u, v, m1)@t0 & (t0 < k & k < t2))
-             | (Ex #k m1 m2 #t0. TEE(u)@k & R2(tidR, v, m1, m2)@t0 & (t0 < k | k < t3))
+             | (Ex #k tidI m1 #t0 #t2. TEE(v)@k & Send(u, v, sk, ad3, tidI)@t2 & I1(tidI, u, v, m1)@t0 & t0 < k)
+             | (Ex #k m1 m2 #t0. TEE(u)@k & R2(tidR, v, m1, m2)@t0 & t0 < k)
            )
        )
     )"
