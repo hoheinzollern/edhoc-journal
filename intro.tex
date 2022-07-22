@@ -79,7 +79,7 @@ Later work~\cite{Norr21} analyze the May 2020 version of \mEdhoc{} in the
 This version of the protocol has five key establishment methods.
 %
 In~\cite{Norr21}, the authors check for injective agreement, implicit
-agreement, and perfect forward secrecy for the session key material.
+agreement, and perfect forward secrecy for the session-key material.
 %
 The authors also discuss some fallouts of the various design choices made as
 part of \mEdhoc{}, and the impact of \mEdhoc{} in multiple use-case scenarios.
@@ -90,18 +90,26 @@ part of \mEdhoc{}, and the impact of \mEdhoc{} in multiple use-case scenarios.
 \label{sec:contributions}
 In this paper, we extend the work presented in~\cite{Norr21}.
 %
-We analyze the version of \mEdhoc{} as in~\cite{}.
+We formally analyze the version of \mEdhoc{} as in~\cite{}.
 %
+We formally analyze the \mEdhoc{} specification as of July
+2020~\cite{our-analysis-selander-lake-edhoc-00}.
+%
+Out formal analysis applies to v5 of the \mSpec{} (February 2021).
+%
+However, we do refer to various aspects
+(error handling, denial of service etc) of this latest version,
+in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 We extend the adversary model and \mTamarin{} system models to capture weak
 post-compromise security (PCS) and model Trusted Execution Environments
 (TEE).
 %
-We check for the following properties:
+We formally verify the following properties:
 \begin{itemize}
 \item Injective agreement
 \item Implicit agreement
-\item Weak post-compromise security for the session key material
-\item Perfect Forward Secrecy (PFS) for the session key material
+\item Weak post-compromise security for the session-key material
+\item Perfect Forward Secrecy (PFS) for the session-key material
 \item Secrecy and integrity of \mADthree
 \end{itemize}
 %
@@ -126,7 +134,7 @@ We have communicated these issues to the developers of the protocol.
 %%
 %
 %We give an explicit adversary model for the protocol and verify
-%properties such as session key material and entity authentication, and
+%properties such as session-key material and entity authentication, and
 %perfect
 %forward secrecy, for all four methods.
 %%
@@ -145,17 +153,17 @@ We have communicated these issues to the developers of the protocol.
 %We show that not all \mEdhoc{}'s key establishment
 %methods provide authentication according to the injective agreement
 %definition
-%on the session key material, and none on the initiator's identity.
+%on the session-key material, and none on the initiator's identity.
 %%
 %However, we show that all methods fulfill an implicit agreement property
-%covering the session key material and the initiator's identity.
+%covering the session-key material and the initiator's identity.
 %%
 %We identify a number of subtleties, ambiguities and weaknesses in the
 %specification.
 %%
 %For example, the authentication policy requirements allows situations where
 %a
-%party establishes session key material with a trusted but compromised peer,
+%party establishes session-key material with a trusted but compromised peer,
 %even
 %though the intention was to establish it with a different trusted party.
 %%
