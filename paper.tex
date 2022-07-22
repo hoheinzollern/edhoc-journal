@@ -5,9 +5,10 @@
 % Version 2.21 of 2022/01/12
 %
 \documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
 
 \usepackage{epsfig}
-\usepackage{subcaption}
+%\usepackage{subcaption}
 \usepackage{calc}
 \usepackage{amssymb}
 \usepackage{amstext}
@@ -22,7 +23,8 @@
 \usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{trees,snakes,arrows}
+%\usetikzlibrary{trees,snakes,arrows}
+\usetikzlibrary{trees,arrows}
 \usetikzlibrary{shapes,chains}
 \usetikzlibrary{positioning}
 \usepackage{hyperref}
@@ -34,19 +36,30 @@
 }
 \usepackage[nospace]{cite}
 
+
 \input{macros}
 
-\title{Formal Analysis of EDHOC Key Establishment for Constrained IoT 
-Devices}
+\begin{document}
+\title{Extended Formal Analysis of the EDHOC Protocol in Tamarin}
 \author{
-        Karl Norrman and 
-        Vaishnavi Sundararajan and
-        Alessandro Bruni
+    Karl Norrman\inst{1,2}\orcidID{0000-0003-0164-1478} \and
+    Vaishnavi Sundararajan\inst{3} \and
+    Alessandro Bruni\inst{4}
+}
+\authorrunning{Norrman, Sundararajan and Bruni}
+\institute{
+    KTH Royal Institute of Technology, Stockholm, Sweden \and
+    Ericsson Research, Security, Stockholm, Sweden\\
+    \email{karl.norrman@ericsson.com} \and
+    University of California Santa Cruz, USA\\
+    \email{vasundar@ucsc.edu} \and
+    IT University of Copenhagen, Copenhagen, Denmark\\
+    \email{brun@itu.dk}
 }
 
-\begin{document}
 \maketitle
 %
+
 \begin{abstract}
 Given how common IoT devices that use constrained resources are becoming 
 today, the need of the hour is communication protocols which can operate 
@@ -74,6 +87,9 @@ specification. In particular, we extend the modelling with trusted execution
 environments (TEEs), modify the way we model \mXor{} encryption, and 
 verify weak post-compromise security (PCS) as well as the secrecy and 
 integrity of some additional data used as part of the protocol.
+\keywords{Formal Verification, Symbolic Dolev-Yao Model,
+           Authenticated Key Establishment, Protocols, IoT, Tamarin.}
+
 \end{abstract}
 %
 %-------------------------------------------------------------------------- sec
