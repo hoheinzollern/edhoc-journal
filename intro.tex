@@ -6,8 +6,7 @@ These constrained devices are often simple in their operation, but need to
 communicate and function without human interference or maintenance for
 extended periods of time.
 %
-IETF is standardizing new protocols to secure communications between
-constrained devices.
+The Internet Engineering Task Force (IETF) is standardizing new protocols to secure communications between devices that operate under such restrictions.
 %
 One such is the Object Security for Constrained RESTful Environments
 (\mOscore{}) protocol.
@@ -16,17 +15,17 @@ However, \mOscore{} requires the pre-establishment of a security context.
 %
 To this end, a key exchange protocol named Ephemeral Diffie-Hellman Over
 COSE
-(\mEdhoc{}) is under discussion in the IETF.
+(\mEdhoc{}) is being discussed in the IETF.
 %
 Since \mEdhoc{} will establish security contexts for \mOscore{}, the same
 resource constraints (especially those pertaining to message size) apply to the
 former as for the latter.
 %
 While establishing security contexts for \mOscore{} is the primary goal for the
-\mEdhoc{} protocol, there might well be other use cases, which have not been
+\mEdhoc{} protocol, there might well be other use cases which have not been
 explored in depth yet.
 %
-It is therefore important to ensure that most of the fundamental properties
+It is therefore important to ensure that fundamental properties
 expected of key exchange protocols as established in the literature are satisfied
 by \mEdhoc{} as well.
 %
@@ -57,6 +56,10 @@ one based on \mSigma{}
 in
 2020, three new cores, which mixed challenge-response signatures and regular
 signatures were added as well~\cite{our-analysis-selander-lake-edhoc-00}.
+%
+While this is the version we base our formal analysis on, there have been later versions. 
+%
+See Section~\ref{sec:newdrafts} for a more detailed discussion.
 
 %-------------------------------------------------------------------------- sub
 \subsection{Related Work and Contributions}
@@ -69,19 +72,18 @@ In this paper, the authors analyze two key establishment methods -- one built
 on
 a pre-shared key authentication core, and one based on \mSigma{}.
 %
-The authors check  various properties, namely secrecy, identity protection
-against an active adversary, strong authentication, perfect forward secrecy
+The authors check  the following properties: secrecy, identity protection, strong authentication, perfect forward secrecy
 (PFS), and integrity of application data.
 %
-Later work~\cite{Norr21} analyze the May 2020 version of \mEdhoc{} in the
+Later work~\cite{Norr21} analyzes the July 2020 version of \mEdhoc{} in the
 \mTamarin{} prover~\cite{DBLP:conf/cav/MeierSCB13}.
 %
-This version of the protocol has five key establishment methods.
+This version of the protocol has four key establishment methods.
 %
-In~\cite{Norr21}, the authors check for injective agreement, implicit
-agreement, and perfect forward secrecy for the session-key material.
+In~\cite{Norr21}, the properties checked for are injective agreement, implicit
+agreement, and perfect forward secrecy for the session key material.
 %
-The authors also discuss some fallouts of the various design choices made as
+That work also includes a discussion about the various design choices made as
 part of \mEdhoc{}, and the impact of \mEdhoc{} in multiple use-case scenarios.
 %%
 
@@ -90,126 +92,37 @@ part of \mEdhoc{}, and the impact of \mEdhoc{} in multiple use-case scenarios.
 \label{sec:contributions}
 In this paper, we extend the work presented in~\cite{Norr21}.
 %
-We formally analyze the version of \mEdhoc{} as in~\cite{}.
-%
 We formally analyze the \mEdhoc{} specification as of July
-2020~\cite{our-analysis-selander-lake-edhoc-00}.
+2020~\cite{our-analysis-selander-lake-edhoc-00}, but our formal analysis applies as far as the version of the \mSpec{} from February 2021.
 %
-Out formal analysis applies to v5 of the \mSpec{} (February 2021).
-%
-However, we do refer to various aspects
-(error handling, denial of service etc) of this latest version,
-in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 We extend the adversary model and \mTamarin{} system models to capture weak
 post-compromise security (PCS) and model Trusted Execution Environments
 (TEE).
+%
+We also alter the formal modelling used for encryption under \mXor{}.
 %
 We formally verify the following properties:
 \begin{itemize}
 \item Injective agreement
 \item Implicit agreement
-\item Weak post-compromise security for the session-key material
 \item Perfect Forward Secrecy (PFS) for the session-key material
+\item Weak post-compromise security for the session-key material
 \item Secrecy and integrity of \mADthree
 \end{itemize}
 %
 We follow the definition of weak PCS by~\cite{DBLP:conf/csfw/Cohn-GordonCG16},
 which subsumes PFS.
 %
-We also discuss various issues arising in relation to the use of trusted
+Since \mEdhoc{} is still a protocol under development, the latest version of \mEdhoc{} is the one from July 2022~\cite{draft-ietf-lake-edhoc-15}, which contains details which are not covered by our formal model.
+%
+We do, however, refer to various aspects
+(error handling, denial of service etc) of the July 2022 version of the \mSpec{}, namely 
+in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
+%
+We also discuss various issues arising due to the use of trusted
 execution environments (TEEs), denial of service (DoS) attacks, error handling,
 the negotiation of parameters (which the formal model abstracts
 away) for establishing the protocol, and other potential attacks and concerns.
 %
 We have communicated these issues to the developers of the protocol.
 %
-
-%In this paper, we formally analyze the \mEdhoc{} protocol (with its four key
-%establishment methods) using the \mTamarin{}
-%tool~\cite{DBLP:conf/cav/MeierSCB13}.
-%%
-%We
-%present a formal model we constructed of the protocol as given in the
-%\mSpec{}~\cite{our-analysis-selander-lake-edhoc-00}.
-%%
-%
-%We give an explicit adversary model for the protocol and verify
-%properties such as session-key material and entity authentication, and
-%perfect
-%forward secrecy, for all four methods.
-%%
-%
-%The model itself is valuable as a basis for verifying further updates in the
-%ongoing standardization.
-%%
-%It is publicly available~\cite{edhocTamarinRepo}.
-%%
-%It took several person-months to interpret the
-%specification and construct the model.
-%%
-%Termination requires a hand-crafted proof oracle to guide \mTamarin{}.
-%%
-%
-%We show that not all \mEdhoc{}'s key establishment
-%methods provide authentication according to the injective agreement
-%definition
-%on the session-key material, and none on the initiator's identity.
-%%
-%However, we show that all methods fulfill an implicit agreement property
-%covering the session-key material and the initiator's identity.
-%%
-%We identify a number of subtleties, ambiguities and weaknesses in the
-%specification.
-%%
-%For example, the authentication policy requirements allows situations where
-%a
-%party establishes session-key material with a trusted but compromised peer,
-%even
-%though the intention was to establish it with a different trusted party.
-%%
-%We provide remedies for the identified issues and have
-%communicated these to the IETF and the specification authors, who
-%incorporated
-%some of our suggestions and currently consider how to deal with the
-%remaining
-%ones.
-%
-
-%-------------------------------------------------------------------------- sub
-%\subsection{Comparison with Related Work}
-%The May 2018 version of \mEdhoc{} was formally analyzed by
-%\cite{DBLP:conf/secsr/BruniJPS18} using the \mProverif{}
-%tool~\cite{DBLP:conf/csfw/Blanchet01}.
-%%
-%Their analysis covered a pre-shared key authenticated core and one
-%based on \mSigma.
-%%
-%The properties checked for therein were secrecy, PFS and integrity of
-%application data, identity protection against an active adversary,
-%and strong authentication.
-%%
-%
-%In contrast to the key establishment methods analyzed by Bruni et~al.,
-%which
-%were based on the well-understood pre-shared key DH and \mSigma{}
-%protocols,
-%the three newly added
-%methods combine two unilateral authentication protocols with the goal to
-%constructing mutual authentication protocols.
-%%
-%Combining two protocols, which individually provide unilateral
-%authentication,
-%is not guaranteed to result in a secure mutual authentication
-%protocol~\cite{DBLP:conf/ccs/Krawczyk16}.
-%%
-%Consequently, even though the framework is similar to the one analyzed by
-%Bruni
-%et~al., the cryptographic underpinnings have significantly increased in
-%complexity, and is using mechanisms which have not previously been
-%formally analyzed.
-%%
-%The set of properties we check for is also different.
-%%
-%Our analysis is further carried out using a different tool,
-%namely \mTamarin; different kinds of strategies to formulate and
-%successfully analyze the protocol are required when working with this tool.

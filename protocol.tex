@@ -17,28 +17,27 @@ public-private key pairs, where $d$ is the private key, $Q$ is the public key,
 $t \in \{e, s\}$ indicates whether the key is ephemeral or static,
 and $\mathit{id}$ indicates the party to whom the key pair belongs.
 %
-When clear from context, we will often drop part (or all) of the subscripts.
+When clear from context, we will often drop some (or all) of the subscripts.
 %
 Static key pairs (suitable for regular or challenge-response signatures)
 are long-term authentication credentials, whereas ephemeral key pairs are
-those
-which are generated afresh for each execution of the protocol.
+those generated afresh for each execution of the protocol.
 %
 
 Parties can authenticate using regular signatures or challenge-response
 signatures.
 %
 In the former case, we say that they use the
-\emph{signature based authentication method} (\mSig{}).
+\emph{signature-based authentication method} (\mSig{}).
 %
-In the latter, we say, following the terminology in the \mSpec{},
+In the latter case, we say, following the terminology in the \mSpec{},
 that they use the \emph{static key authentication method} (\mStat{}).
 %
 We adopt the challenge-response terminology
 from~\cite{DBLP:conf/crypto/Krawczyk05}.
 %
 
-\mEdhoc{} fundamentally use elliptic curves and associated Diffie-Hellman
+\mEdhoc{} fundamentally uses elliptic curves and associated Diffie-Hellman
 operations.
 %
 Signatures using a party $A$'s keys are denoted by \mSign{A}$(\cdot)$, while
@@ -49,40 +48,27 @@ on the elliptic curve is represented as $\mDH(d, P)$.
 %
 We will often overload notation to let $P$ stand for both the point on the
 elliptic curve as well as the corresponding bitstring encoding.
-%
-%\mEdhoc{} relies on \mCose{}~\cite{rfc8152} for elliptic curve operations and
-%transforming points into bitstrings, and we therefore abstract those as
-%follows.
-%
-%Signatures and verification thereof using party $A$'s key pair are
-%denoted \mSign{A}$(\cdot)$ and \mVf{A}$(\cdot)$ respectively.
-%%
-%The DH-primitive combining a private key $d$ and a point $P$ is denoted
-%$\mDH(d,P)$.
-%%
-%We abuse notation and let these function symbols denote operations on both
-%points and the corresponding bitstrings.
-%
 
 %------------------------------------------------------------------------- sub
 \subsection{Overall Description}
 \label{sec:description}
-\mEdhoc{} is designed to establish a security context for \mOscore{}.
+\mEdhoc{} is designed to establish a security context for the \mOscore{} protocol.
 %
-This context includes the session-key material (we denote this by
+This context, in particular, includes the session-key material (we denote this by
 \mSessKey{}).
 %
-The abstract protocol as given in the \mSpec{}~\cite{} consists of three
-messages, and is shown in Figure~\ref{fig:edhocFramework}~\cite{Norr21}.
+The generalized abstract protocol as given in the \mSpec{}~\cite{our-analysis-selander-lake-edhoc-00} consists of three
+messages, and is shown in Figure~\ref{fig:edhocFramework}.
 %
-The generalized abstract protocol is the same across methods,
-and may transfer application data \mADone{}, \mADtwo{}, and \mADthree{} in
-addition to establishing the context.
+The abstract structure is the same across methods.
 %
-The authentication mechanisms and key derivation procedures differ between
+However, the authentication mechanisms and key derivation procedures differ between
 methods.
 %
-We will describe the various aspects of the protocol now.
+\mEdhoc{} may also transfer application data \mADone{}, \mADtwo{}, and \mADthree{} in
+addition to establishing the \mOscore{} security context.
+%
+
 %
 \begin{figure}[ht]
 \centering
@@ -107,24 +93,24 @@ protected.~\cite{Norr21}}
 \label{fig:edhocFramework}
 \end{figure}
 %
-Of the three messages, the first two, among other things, serve to establish a
-common authentication method \mMethod{}, and a ciphersuite \mSuites{}.
+Of the three messages \mMsgone, \mMsgtwo, and \mMsgthree, the first two, among other things, establish a
+common authentication method \mMethod{} and ciphersuite \mSuites{}.
 %
-In \mMethod{}, the party playing the initiator role proposes which
-authentication methods the two parties shall use, and an ordered list
+The party playing the initiator role uses \mMethod{} to propose which
+authentication methods the two parties shall use, and in \mSuites{}, proposes an ordered list
 of choices for the ciphersuite.
 %
-As mentioned earlier, the authentication methods may differ for the two roles,
+The chosen authentication methods may differ for the two roles,
 yielding four possible
 combinations: \mSigSig{}, \mSigStat{}, \mStatSig{}, and \mStatStat{},
 where the first authentication method in each combination is used by the
-initiator role, and the second by the responder role.
+initiator, and the second by the responder.
 \footnote{As in the \mSpec{}, we will from now on overload
 notation and refer to the combinations of authentication methods as methods
 as
 well.}
 %
-The party executing the responder role may choose to reject the method or
+The party executing the responder role may choose to reject the method and/or
 ciphersuite chosen by the initiator by sending an error message.
 %
 This results in abandoning this session and renegotiating, as the initiator
@@ -139,7 +125,7 @@ However, we will discuss the ramifications of such a renegotiation procedure
 and the error messages later, in Section~\ref{sec:errorHandling}.
 %
 
-In addition to negotiating the ciphersuite, the first two messages are
+In addition to negotiating the method and ciphersuite, the first two messages are
 also instrumental for the exchange of public ephemeral keys \mGx{} and
 \mGy{},
 and connection identifiers \mCi{} and \mCr{}, for the initiator and responder
@@ -148,7 +134,7 @@ roles respectively.
 The \mSpec{} states that the connection identifiers serve only to route
 messages
 to the correct party executing \mEdhoc{}, but also claims that they may be
-used in turn by protocols (like \mOscore{}) using the security context
+used in turn by protocols (like \mOscore{}) which use the security context
 established by \mEdhoc{}.
 %
 While the \mSpec{} does not require any explicit security guarantees to be
@@ -173,14 +159,17 @@ Additionally, the messages contain authenticating information
 party know that the other party does indeed control the long-term key
 associated with these identifiers.
 %
-The authentication information is different for each authentication method.
+The authentication information is structured differently for each authentication method.
 %
-Consider the following example scenario.
+
+Consider the following scenario.
 %
-The initiator $I$ chooses the method $\mSigStat{}$ and sends this via
+The initiator $I$ chooses the method $\mSigStat{}$, and sends this via
 $\mMethod{}$ to the responder $R$.
 %
-$R$ now has an option to either reject this choice of method, or to provide an
+$R$ now has the option to reject this choice of method.
+%
+However, if $R$ chooses to accept this method, they need to provide an
 identifier \mIdcredr{} for a key pair which can be used with
 challenge-response
 signatures
@@ -194,21 +183,116 @@ pair, which is suitable for regular signatures, and provide authentication
 %-------------------------------------------------------------------------- sub
 \subsection{Key Schedule}
 \label{sec:keysched}
-As mentioned above, the second and third messages of \mEdhoc{} contain
+The second and third messages of \mEdhoc{} contain
 authenticating information.
 %
 This information is either a signature or a message authentication code (MAC),
 as we will describe in more detail in Section~\ref{sec:edhocauth}.
 %
-The keys for these are generated by using a key schedule which takes at least
-one DH key \mGxy{} as basic input, as shown in Figure~\ref{fig:kdfdiagram},
-and is intrinsic to the functioning of \mEdhoc{}.
+The keys for these are generated using a key schedule which is intrinsic to the functioning of \mEdhoc{}.
+%
+The key schedule takes a DH key \mGxy{} as basic input and builds upon it, as shown in Figure~\ref{fig:kdfdiagram}.
 %
 \begin{figure}[!h]
 \scalebox{.785}{
-\input{kdfdiagram.tex}
+\begin{tikzpicture}[%
+    >=latex,              % Nice arrows; your taste may be different
+    start chain=going below,    % General flow is top-to-bottom
+    node distance=4mm and 60mm, % Global setup of box spacing
+    every join/.style={norm},   % Default linetype for connecting boxes
+    ]
+\tikzset{
+terminput/.style={rounded corners},
+term/.style={rounded corners},
+  base/.style={draw, thick, on chain, on grid, align=center, minimum height=4ex},
+  dhkbox/.style={draw=cbgreen, fill=cbgreen!25, rectangle},
+  dhk/.style={base, dhkbox},
+  prkbox/.style={draw=cborange, fill=cborange!25, rectangle},
+  prk/.style={base, prkbox},
+  hkdfext/.style={base, draw=black, fill=none, rectangle},
+  hkdfexp/.style={base, draw=black, fill=none, rectangle},
+  keybbox/.style={draw=cbnavy, fill=cbnavy!25, rectangle},
+  keyb/.style={base, keybbox, text width=4em},
+  norm/.style={->, draw, black},
+  cond/.style={base, draw=black, dashed, fill=none, rectangle},
+  txt/.style={base, draw=none, fill=none}
+  }
+\node [prk, join] (p2) {\mPRKtwo};
+\node [cond, join] (c1) {R uses \mStat?};
+
+\node [prk, below=6mm of c1.south] (p3) {\mPRKthree};
+\draw [->, norm] (c1.south) -- (p3.north) node[midway, right] {N};
+
+\node [cond, join, below=10mm of p3.south] (c2) {I uses \mStat?};
+\node [prk, below=8mm of c2.south] (p4) {\mPRKfour};
+\draw [->, norm] (c2.south) -- (p4.north) node[midway, right] {N};
+
+\node [hkdfext, right=3cm of p3] (h3) {\mHkdfExtract};
+\node [hkdfext, right=3cm of p4] (h5) {\mHkdfExtract};
+
+\node [hkdfexp, shape border rotate=180, left= 2.5cm of p4] (h6) {\mHkdfExpand};
+\node [keyb, join, left=3cm of h6] (k3) {\mKthreem};
+\node [hkdfexp, shape border rotate=180, below= 0.8cm of h6] (h9) {\mHkdfExpand};
+\node [txt, join, left=1cm of h9.west] (t4) {EDHOC-Exporter};
+
+\node [hkdfexp, shape border rotate=180, left= 2.5cm of p3] (h4) {\mHkdfExpand};
+\node [keyb, join, left=3cm of h4] (k2) {\mKtwom};
+
+\node [hkdfexp, shape border rotate=180, left= 2.5cm of p2] (h2) {\mHkdfExpand};
+\node [keyb, join, left=3cm of h2] (k1) {\mKtwoe};
+
+\node [hkdfexp, shape border rotate=180, below= 0.8cm of h4] (h8) {\mHkdfExpand};
+\node [keyb, below=0.8cm of k2] (k2b) {\mKthreeae};
+
+\node [txt, left=1cm of k1.west] (t1) {Enc (XOR) \\ in m2};
+\node [txt, left=1cm of k2.west] (t2) {\mMactwo~(signed if \\ R uses \mSig)};
+\node [txt, left=1cm of k2b.west] (t2b) {\mAead\ in m3};
+\node [txt, left=1cm of k3.west] (t3) {\mMacthree~(signed if \\ I uses \mSig)};
+
+\draw [->, norm] (k1.west) -- (t1.east);
+\draw [->, norm] (k2.west) -- (t2.east);
+\draw [->, norm] (k2b.west) -- (t2b.east);
+\draw [->, norm] (k3.west) -- (t3.east);
+
+\draw [->, norm] (p3.south) ++(0,-0.5) -- (h8);
+\draw [->, norm] (h8) -- (k2b);
+\draw [->, norm] (p2) -- (h2); 
+\draw [->, norm] (c1.east) -- ++(2.025,0) -- (h3.north) node[midway,above left] {Y};
+\draw [->, norm] (h3.west) -- (p3.east);
+\draw [->, norm] (p3) -- (h4); 
+\draw [->, norm] (c2.east) -- ++(2.07,0) -- (h5.north) node[midway,above left] {Y};
+\draw [->, norm] (h5.west) -- (p4.east);
+\draw [->, norm] (p4) -- (h6);
+\draw [->, norm] (p4.west) ++(-0.25,-0) -- ++(0,-0.8) -- (h9.east);
+
+\node [hkdfext, right=3cm of p2] (h1) {\mHkdfExtract};
+\node [dhk, right=2.7cm of h1] (p0) {$\mGxy$};
+\node [terminput, text width=2em, below = 0.2cm of p0] (u1) {Salt};
+\draw [->] (h1.west) -- (p2.east);
+\draw [->] (u1.west) -- ++(-2.27,0) -- (h1.south);
+\draw [->] (p0.west) -- (h1.east);
+
+
+\node [dhk, right = 2.7cm of h3] (u2) {$P_R$};
+\draw [->, norm] (u2.west) -- (h3.east);
+
+\node [dhk, right = 2.7cm of h5] (u3) {$P_I$};
+\draw [->, norm] (u3.west) -- (h5.east);
+
+
+\node [term, above = 0.55cm of h4] (u5) {\mTHtwo};
+\draw [->, dotted, shorten >=1mm] (u5) -- (h4);
+\draw [->, dotted, shorten >=1mm] (u5) -- (h2);
+
+\node [term, above = 0.5cm of h6] (u6) {\mTHthree};
+\draw [->, dotted, shorten >=1mm] (u6) -- (h6);
+\draw [->, dotted, shorten >=1mm] (u6) -- (h8);
+
+\node [term, below=0.4cm of p4] (u7) {\mTHfour};
+\draw [-> , dotted ] (u7.west) -- ([yshift=-0.4em] h9.east);
+\end{tikzpicture}
 }
-\caption{Key schedule: $P_e, P_I, P_R$ are the DH keys, \mPRKtwo,
+\caption{Key schedule for~\cite{our-analysis-selander-lake-edhoc-00}: $P_e, P_I, P_R$ are the DH keys, \mPRKtwo,
 \mPRKthree, \mPRKfour{} are the intermediate key material, and
 \mKtwoe,\mKtwom,
 \mKthreeae, \mKthreem{} are the encryption keys for \mAead{} or
@@ -220,7 +304,7 @@ and is intrinsic to the functioning of \mEdhoc{}.
 To derive keys, \mEdhoc{} uses two functions from the \mHkdf{}
 interface~\cite{rfc5869}, \mHkdfExtract{} and \mHkdfExpand{}.
 %
-Both functions take as argument two values -- a salt, and an input.
+Both functions take as argument two values -- an input and a salt.
 %
 For \mHkdfExtract{}, the input is a DH key, while for \mHkdfExpand{},
 it is intermediate key material.
@@ -235,7 +319,7 @@ This key gives rise to intermediate keys \mPRKtwo{}, \mPRKthree{} and
 %
 Each intermediate key gives rise to encryption and integrity keys
 (\mKtwoe, \mKtwom{}, \mKthreeae, and \mKthreem)
-for a particular message in the protocol.
+corresponding to each message in the protocol.
 %
 
 In order to generate the final keys, the two \mHkdf{} algorithms use various
@@ -249,23 +333,18 @@ string as the salt.
 \mStat{} method, using the corresponding DH key as input and the previous
 intermediate key as salt.
 %
-The key $P_{R}$ is used if the responder uses the \mStat{} authentication
+The key $P_{R}$, which is computed as $\mDH(\mX,\ \mGr{}) = \mDH(\mPriv{R},\
+\mGx)$, is used if the responder uses the \mStat{} authentication
 method.
-%
-$P_{R}$ is the key computed as $\mDH(\mX,\ \mGr{}) = \mDH(\mPriv{R},\
-\mGx)$.
 %
 Similarly, the key $P_{I}$ is used if the initiator uses \mStat{}, and is
 computed as $\mDH(\mY,\ \mGi{}) = \mDH(\mPriv{I},\ \mGy)$.
 %
 
-These intermediate keys are fed into \mHkdfExpand{}, as shown in
-Figure~\ref{fig:kdfdiagram}.
-%
-\mHkdfExpand{} here uses as salt a value $\textit{th}$, which is a running
+These intermediate keys are fed into \mHkdfExpand{}, which uses as salt a value $\textit{th}$, which is a running
 hash of the information transmitted thus far as part of the protocol.
 %
-$\textit{th}_{i}$ denotes the hash corresponding to the $i^{\rm{th}}$ message.
+By $\textit{th}_{i}$, we denote the hash corresponding to the $i^{\rm{th}}$ message.
 %
 
 At the end of a successful run of the protocol, the session-key material is
@@ -276,9 +355,8 @@ the \mStat{} authentication method, then it also includes $P_{I}$ (resp.
 $P_{R}$).
 %
 We
-%discuss which material should be included in \mSessKey{} in more detail
-in
-the formal model in Section~\ref{sec:formalization} and the consequences of
+discuss which material should be included in \mSessKey{} in more detail
+in Section~\ref{sec:formalization}, and the consequences of
 various choices in Section~\ref{sec:sessionKeyMaterial}.
 %
 Once \mSessKey{} has been established, an \mHkdf{}-based key exporter
@@ -290,9 +368,9 @@ named
 \subsection{About Authentication in \mEdhoc{}}
 \label{sec:edhocauth}
 We now describe how the authentication information is constructed,
-depending on which method is used.
+depending on whether the \mSig{} or \mStat{} method is used.
 %
-For both \mStat{} and \mSig{}, the following information is used to compute
+For both methods, the following information is used to compute
 \mAuthr{}: \mIdcredr{}, \mCredr{}, a transcript hash of all the communicated
 information thus far in the protocol, and \mADtwo{}, if included.
 %
@@ -300,8 +378,7 @@ information thus far in the protocol, and \mADtwo{}, if included.
 initiator role.
 %
 A MAC is obtained by feeding this material as additional data and the empty
-string as input to the Authenticated Encryption with Additional Data (AEAD)
-encryption algorithm as indicated in the established ciphersuite \mSuites{}.
+string as input to the Authenticated Encryption with Additional Data (AEAD) algorithm as indicated in the established ciphersuite \mSuites{}.
 %
 The encryption key for the AEAD algorithm is constructed, for both roles,
 using the ephemeral key material \mGx{}, \mGy{}, \mX{}, and \mY{}.
@@ -312,7 +389,7 @@ these computations.
 %
 
 When $I$ uses the \mSig{} authentication method, \mAuthi{} is $I$'s signature
-over the MAC along with the data covered by the MAC.
+over the MAC computed as above, along with the data covered by the MAC.
 %
 However, when $I$ uses the \mStat{} method, \mAuthi{} is just the MAC, with
 one difference: the MAC key is derived using both the ephemeral key material
@@ -329,7 +406,7 @@ $R$).
 The abstract calculation for the authentication information values is as shown
 in Table~\ref{tab:authvalues}~\cite{Norr21}.
 %
-We use $\mathit{MAC}_{I}$ (resp. $\mathit{MAC}_{R}$) to denote a MAC
+We use $\mathit{MAC}_{R}$ (resp. $\mathit{MAC}_{I}$) to denote a MAC
 which uses
 an encryption key constructed using
 $\langle\mPriv{R},\ \mPub{R}\rangle$ and $\langle\mX,\ \mGx\rangle$
@@ -362,7 +439,7 @@ the plaintext and the output of the key derivation function \mHkdf{}, as
 in Section~\ref{sec:keysched}.
 %
 For the third message, encryption and integrity protection is assured by the
-\mAead{} algorithm which is part of the established ciphersuite \mSuites{}.
+\mAead{} algorithm.
 %
 
 In Figure~\ref{fig:edhocsigstat} we show an example of protocol execution
@@ -450,68 +527,57 @@ ciphersuite \mSuites{}.~\cite{Norr21}}
 %------------------------------------------------------------------------- sec
 \section{Implementation Aspects and Key Protection}
 \label{sec:TEE}
-Authentication of a specific IoT device assumes that this device is the only
-entity with access to the long-term key associated with the corresponding
+Authentication of a specific IoT device assumes that the device is the only
+entity with access to the long-term key associated with its
 identity.
 %
 Since IoT devices may be accessible to adversaries, e.g., an insider cloning a
-key card, the long-term keys must be appropriately protected.
+key card, long-term keys must be appropriately protected.
 %
-A state-of-the-art approach is to use a TEE,
+A state-of-the-art approach is to use a trusted execution environment (TEE),
 which holds the key and provides an API for operations using the key.
 %
 This is the approach taken by the
-TrustZone based \mMuEdhoc{}~\cite{DBLP:conf/codaspy/Hristozov0XFLS21}
-implementation for example.
+TrustZone-based \mMuEdhoc{}~\cite{DBLP:conf/codaspy/Hristozov0XFLS21}
+implementation, for example.
 %
 Typical operations include signatures using the long-term private key of a
 party.
 %
 
-TEEs come in various forms of differing complexity.
+TEEs can be of differing complexity.
 %
-Some, like ARM TrustZone and Intel SGX are general purpose execution
-environments, which are flexibly programmable.
+Some, like ARM TrustZone and Intel SGX, are general-purpose execution
+environments, which can be programmed in many different ways.
 %
-Other, like the Universal Subscriber Identity Modules (USIM) used for
-authentication to 3GPP mobile networks, have application specific interfaces
+Others, like the Universal Subscriber Identity Modules (USIM) used for
+authentication to 3GPP mobile networks, have application-specific interfaces
 for
-authentication and key agreement protocols etc.
-%
-A key aspect is how much of the application is placed in the TEE and how
-much is
-outside.
+authentication, key agreement protocols etc.
 %
 
-For larger devices that include general purpose processors with TrustZone or
-SGX, entire \mEdhoc{} and \mOscore{} may reside inside the TEE.
+A fundamental aspect of TEEs is how much of the application is placed in the TEE.
 %
-For constrained IoT devices in the lower end of the scale, a TEE may have to be
+For larger devices that include general-purpose processors with TrustZone or
+SGX, entire \mEdhoc{} and \mOscore{} implementations may reside inside the TEE.
+%
+For constrained IoT devices on the lower end of the scale, a TEE might have to be
 implemented using a special-purpose integrated circuit.
 %
 In the latter case, it may be beneficial to follow a minimalistic approach, and
-contain the long-term key and only
-the operations that need access to it in the TEE for cost reasons.
+only store in the TEE the long-term key and operations that need access to it, to reduce cost.
 %
 
-It may at first appear more secure to implement as much as possible inside the
-TEE, but there is a security trade-off: the more code inside the TEE,
-the higher the risk of implementation errors in the security-critical code.
+In general, it might appear more secure to implement as much as possible inside the TEE, but there is a security trade-off.
 %
-Because the security critical code runs in the area where the long-term keys
+Because security-critical code runs in the same area as where long-term keys
 reside, an implementation error here risks leaking information of the key to
-the
-adversary.
+the adversary.
 %
-From this perspective, it may be beneficial to follow the minimalistic approach
-even when having access to Trust Zoneor SGX.
+From this perspective, it might be beneficial to follow the minimalistic approach
+even when having access to TrustZone or SGX.
 %
 
-A slightly more secure division of functionality is to also keep the
-session key inside
-the TEE and extend the interface to accept messages and return the
-(en/de)crypted counterpart.
-%
-That is, the interface exposes \mAead{} functions in the interface.
+A slightly more secure division of functionality is to keep both the long-term key and the session key inside the TEE and extend the interface to accept messages and return the (en/de)crypted counterpart, i.e. the interface exposes \mAead{} functions.
 %
 
