@@ -62,7 +62,7 @@ check:
 	zgrep --color=auto -E "verified|falsified|Killed|(user.*m.*s)|(real.*m.*s)" ${PROOFS}/*
 
 proofdir:
-	mkdir -p proofs
+	mkdir -p ${PROOFS}
 
 genModels: proofdir
 	m4 ${MFLAGS} ${MSIGSTAT} ${MXOR} ${SRC} > ${TSIGSTAT}
@@ -142,7 +142,7 @@ clean:
 	rm ./TMP_*.spthy
 
 cleanproofs:
-	rm ./proofs/*.spthy
+	rm ./${PROOFS}/*.spthy
 
 proverifAll:
 	proverif ${LOADLIB} ${MODEL}
