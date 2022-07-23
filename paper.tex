@@ -37,13 +37,204 @@
 \usepackage[nospace]{cite}
 
 
-\input{macros}
+%\input{macros}
+\usepackage{ifthen}
+\newcommand{\mPoint}[1]{{\color{red}\textbf{Point: }#1}}
+\newcommand{\mcneed}{\textbf{Citation needed}}
+\newcommand{\mcfix}{\textbf{Fix citation}}
+
+\definecolor{cbnavy}{RGB}{15, 32, 128}
+\definecolor{cborange}{RGB}{245, 121, 58}
+\definecolor{cbgreen}{RGB}{0, 150, 50}
+
+%\newcommand{\runhead}[1]{\noindent\textbf{#1. }}
+\newcommand{\runhead}[1]{\subsubsection{#1}}
+
+% -- Fonts and styles for names
+%\newcommand{\mItemStyle}[1]{\ensuremath{#1}}
+%\newcommand{\mSetStyle}[1]{\ensuremath{\mathrm{\mathbf{#1}}}}
+%\newcommand{\mFunStyle}[1]{\text{\textup{\textsf{#1}}}}
+%\newcommand{\mConstStyle}[1]{\text{\textup{\textsf{#1}}}}
+%\newcommand{\mVarStyle}[1]{\mathit{#1}}
+%\newcommand{\mFactStyle}[1]{\text{\textsf{#1}}}
+%\newcommand{\mMethodStyle}[1]{\mbox{\mConstStyle{#1}}}
+%\newcommand{\mProtocolStyle}[1]{\mbox{\textrm{#1}}}
+
+%\newcommand{\mItemStyle}[1]{\ensuremath{#1}}
+%\newcommand{\mSetStyle}[1]{\ensuremath{\mathrm{\mathbf{#1}}}}
+\newcommand{\mFunStyle}[1]{\textsf{#1}}
+\newcommand{\mConstStyle}[1]{\textsf{#1}}
+\newcommand{\mVarStyle}[1]{\mathit{#1}}
+\newcommand{\mFactStyle}[1]{\textsf{#1}}
+\newcommand{\mMethodStyle}[1]{\mConstStyle{#1}}
+\newcommand{\mProtocolStyle}[1]{\text{#1}}
+
+
+
+% -- Macros for consistent wording
+\newcommand{\mSpec}{specification}  % The EDHOC spec document we are analyzing
+\newcommand{\mDate}{2020-07-06}
+
+
+
+% -- Formalization notation
+\newcommand{\mRevLTK}{\ensuremath{\mathbf{A}_\mFunStyle{LTK}}}
+\newcommand{\mTEE}{\ensuremath{\mathbf{A}_\mFunStyle{TEE}}}
+\newcommand{\mRevEph}{\ensuremath{\mathbf{A}_\mFunStyle{Eph}}}
+\newcommand{\mIStart}{\ensuremath{\mathbf{I}_\mFunStyle{S}}}
+\newcommand{\mIComplete}{\ensuremath{\mathbf{I}_\mFunStyle{C}}}
+\newcommand{\mRStart}{\ensuremath{\mathbf{R}_\mFunStyle{S}}}
+\newcommand{\mRComplete}{\ensuremath{\mathbf{R}_\mFunStyle{C}}}
+\newcommand{\mISend}{\ensuremath{\mathbf{I}_{\mFunStyle{SEND}}}}
+\newcommand{\mRRecv}{\ensuremath{\mathbf{R}_{\mFunStyle{Recv}}}}
+
+\newcommand{\mPredPcs}{\ensuremath{\mathbf{PCS}}}
+\newcommand{\mPredInjI}{\ensuremath{\mathbf{InjAgree}_I}}
+\newcommand{\mPredInjR}{\ensuremath{\mathbf{InjAgree}_R}}
+\newcommand{\mPredImpI}{\ensuremath{\mathbf{ImpAgree}_I}}
+\newcommand{\mPredImpR}{\ensuremath{\mathbf{ImpAgree}_R}}
+\newcommand{\mSecADthree}{\ensuremath{\mathbf{{Sec}\mADthree}}}
+\newcommand{\mIntADthree}{\ensuremath{\mathbf{Integ\mADthree}}}
+\newcommand{\mK}{\ensuremath{\mathcal{K}}}
+\DeclareMathOperator{\mLogicDot}{.}
+
+
+% -- Domain specific macros
+\newcommand{\mArxiv}{\texttt{arXiv}}
+\newcommand{\mTamarin}{\mProtocolStyle{Tamarin}}
+\newcommand{\mProverif}{\mProtocolStyle{ProVerif}}
+\newcommand{\mEdhoc}{\mProtocolStyle{EDHOC}}
+\newcommand{\mMuEdhoc}{\mProtocolStyle{\ensuremath{\mu}EDHOC}}
+\newcommand{\mOscore}{\mProtocolStyle{OSCORE}}
+\newcommand{\mSigma}{\mProtocolStyle{SIGMA}}
+\newcommand{\mSigmaI}{\mProtocolStyle{SIGMA\nobreakdash-I}}
+\newcommand{\mCbor}{\mProtocolStyle{CBOR}}
+\newcommand{\mCose}{\mProtocolStyle{COSE}}
+\newcommand{\mCoseEncrypt}{\mProtocolStyle{COSE\_Encrypt0}}
+\newcommand{\mCoseSign}{\mProtocolStyle{Cose\_Sign1}}
+\newcommand{\mHkdf}{\mProtocolStyle{HKDF}}
+\newcommand{\mHkdfExtract}{\mProtocolStyle{HKDF\nobreakdash-extract}}
+\newcommand{\mHkdfExpand}{\mProtocolStyle{HKDF\nobreakdash-expand}}
+\newcommand{\mHmac}{\mProtocolStyle{HMAC}}
+\newcommand{\mAead}{\mProtocolStyle{AEAD}}
+\newcommand{\mAeadDecrypt}{\mProtocolStyle{AEAD\nobreakdash-decrypt}}
+\newcommand{\mDecrypt}{\mProtocolStyle{decrypt}}
+\newcommand{\mOptls}{\mProtocolStyle{OPTLS}}
+\newcommand{\mNoise}{\mProtocolStyle{Noise}}
+\newcommand{\mTls}{\mProtocolStyle{TLS}}
+\newcommand{\mDandTls}{\mProtocolStyle{(D)TLS}}
+\newcommand{\mCtls}{\mProtocolStyle{cTLS}}
+\newcommand{\mCoap}{\mProtocolStyle{CoAP}}
+
+\newcommand{\mStat}{\mMethodStyle{STAT}}
+\newcommand{\mSig}{\mMethodStyle{SIG}}
+\newcommand{\mPsk}{\mMethodStyle{PSK}}
+\newcommand{\mStatStat}{\mMethodStyle{STAT-STAT}}
+\newcommand{\mStatSig}{\mMethodStyle{STAT-SIG}}
+\newcommand{\mSigStat}{\mMethodStyle{SIG-STAT}}
+\newcommand{\mSigSig}{\mMethodStyle{SIG-SIG}}
+\newcommand{\mPskPsk}{\mMethodStyle{PSK-PSK}}
+
+\newcommand{\mSid}{\mConstStyle{sid}}    % session id = (u, v, s-key)
+
+\newcommand{\mXor}{\mConstStyle{XOR}}
+\newcommand{\mSuites}{\ensuremath{S_I}}
+\newcommand{\mMethod}{\ensuremath{M}}
+\newcommand{\mCi}{\ensuremath{C_I}}
+\newcommand{\mCr}{\ensuremath{C_R}}
+\newcommand{\mGu}{\ensuremath{Q_{s,U}}}
+\newcommand{\mGi}{\ensuremath{Q_{s,I}}}
+\newcommand{\mGr}{\ensuremath{Q_{s,R}}}
+\newcommand{\mPriv}[1]{\ensuremath{d_{s,#1}}}
+\newcommand{\mPub}[1]{\ensuremath{Q_{s,#1}}}
+\newcommand{\mPrivE}[1]{\ensuremath{d_{e,#1}}}
+\newcommand{\mPubE}[1]{\ensuremath{Q_{e,#1}}}
+\newcommand{\mX}{\ensuremath{d_{e,I}}}
+\newcommand{\mY}{\ensuremath{d_{e,R}}}
+\newcommand{\mGiy}{\ensuremath{\mY\cdot\mGi}}
+\newcommand{\mGrx}{\ensuremath{\mX\cdot\mGr}}
+\newcommand{\mGx}{\ensuremath{Q_{e,I}}}
+\newcommand{\mGy}{\ensuremath{Q_{e,R}}}
+\newcommand{\mGxy}{\ensuremath{P_e}}
+\newcommand{\mSessKey}{\ensuremath{Z}}
+\newcommand{\mIDPsk}{\mConstStyle{ID\_PSK}}
+\newcommand{\mSign}[1]{\ensuremath{\mathit{sign_{#1}}}}
+\newcommand{\mVf}[1]{\ensuremath{\mathit{vf_{#1}}}}
+\newcommand{\mDH}{\ensuremath{\mathit{dh}}}
+\newcommand{\mTH}{\ensuremath{\mathit{th}}}
+\newcommand{\mTHtwo}{\ensuremath{\mathit{th}_2}}
+\newcommand{\mKtwoe}{\ensuremath{K_\mathit{2e}}}
+\newcommand{\mKtwom}{\ensuremath{K_\mathit{2m}}}
+\newcommand{\mKtwoae}{\ensuremath{K_\mathit{2ae}}}
+\newcommand{\mTID}{\ensuremath{\mathit{tid}}}
+
+\newcommand{\mKthreeae}{\ensuremath{K_\mathit{3ae}}}
+\newcommand{\mKthreem}{\ensuremath{K_\mathit{3m}}}
+
+\newcommand{\mTHthree}{\ensuremath{\mathit{th}_3}}
+\newcommand{\mhplain}{\ensuremath{h''}}
+\newcommand{\mCredi}{\ensuremath{Q_{s,I}}}
+\newcommand{\mCredr}{\ensuremath{Q_{s,R}}}
+\newcommand{\mHash}{\ensuremath{h}}
+
+\newcommand{\mTHfour}{\ensuremath{\mathit{th}_4}}
+\newcommand{\mAuthi}{\ensuremath{\mathit{Auth}_I}}
+\newcommand{\mAuthr}{\ensuremath{\mathit{Auth}_R}}
+
+\newcommand{\mMactwo}{\ensuremath{\mathit{MAC}_2}}
+\newcommand{\mMacthree}{\ensuremath{\mathit{MAC}_3}}
+
+\newcommand{\mSigtwo}{\ensuremath{\mathit{Sig}_2}}
+\newcommand{\mSigthree}{\ensuremath{\mathit{Sig}_3}}
+
+% \newcommand{\mMsgone}{\mConstStyle{m1}}
+% \newcommand{\mMsgtwo}{\mConstStyle{m2}}
+% \newcommand{\mMsgthree}{\mConstStyle{m3}}
+\newcommand{\mMsgone}{\ensuremath{m_1}}
+\newcommand{\mMsgtwo}{\ensuremath{m_2}}
+\newcommand{\mMsgthree}{\ensuremath{m_3}}
+
+\newcommand{\mCipher}{\mConstStyle{CIPHERTEXT\_2}}
+
+\newcommand{\mAD}{\ensuremath{\mathit{ad}}}
+\newcommand{\mADone}{\ensuremath{\mathit{ad}_1}}
+\newcommand{\mADtwo}{\ensuremath{\mathit{ad}_2}}
+\newcommand{\mADthree}{\ensuremath{\mathit{ad}_3}}
+
+\newcommand{\mPRK}{\ensuremath{\mathit{PRK}}}
+\newcommand{\mPRKtwo}{\ensuremath{\mPRK_\mathit{2e}}}
+\newcommand{\mPRKthree}{\ensuremath{\mPRK_\mathit{3e2m}}}
+\newcommand{\mPRKfour}{\ensuremath{\mPRK_\mathit{4x3m}}}
+
+\newcommand{\mIdcredi}{\ensuremath{ID_I}}
+\newcommand{\mIdcredr}{\ensuremath{ID_R}}
+\newcommand{\mLtki}{\mConstStyle{ltk\_I}}
+\newcommand{\mLtkr}{\mConstStyle{ltk\_R}}
+\newcommand{\mLtk}{\mConstStyle{ltk}}
+
+\newcommand{\cm}{\checkmark}
+
+% TIKZ messages and actions
+\newcommand{\msg}[4]{\draw[->,thick] ([yshift=-#1]#2.south) coordinate (l1)--(l1-|#3) node[midway, above]{#4}}
+\newcommand{\action}[3]{\node[draw,thick,fill=white,align=center,below={#1} of {#2}]{#3}}
+
+% Tamarin symbols
+\newcommand{\ifarrow}[1][]{\ifthenelse{\equal{#1}{}}{\rightarrow}{-\hspace{-4.22pt}[{#1}]\hspace{-5.6pt}\rightarrow}}
+\newcommand{\semarrow}[1][]{\ifthenelse{\equal{#1}{}}{\Rightarrow}{=\hspace{-3.0pt}[{#1}]\hspace{-3pt}\Rightarrow}}
+\newcommand{\mIn}{\mathsf{In}}
+\newcommand{\mOut}{\mathsf{Out}}
+\newcommand{\mFr}{\mathsf{Fr}}
+\newcommand{\mKD}{\mathsf{KD}}
+\newcommand{\mKU}{\mathsf{KU}}
+\newcommand{\mT}[1]{\text{\texttt{#1}}}
+
+
 
 \begin{document}
 \title{Extended Formal Analysis of the EDHOC Protocol in Tamarin}
 \author{
     Karl Norrman\inst{1,2}\orcidID{0000-0003-0164-1478} \and
-    Vaishnavi Sundararajan\inst{3} \and
+    Vaishnavi Sundararajan\inst{3}\orcidID{0000-0002-5945-5208} \and
     Alessandro Bruni\inst{4}
 }
 \authorrunning{Norrman, Sundararajan and Bruni}
@@ -51,7 +242,7 @@
     KTH Royal Institute of Technology, Stockholm, Sweden \and
     Ericsson Research, Security, Stockholm, Sweden\\
     \email{karl.norrman@ericsson.com} \and
-    University of California Santa Cruz, USA\\
+    University of California, Santa Cruz, USA\\
     \email{vasundar@ucsc.edu} \and
     IT University of Copenhagen, Copenhagen, Denmark\\
     \email{brun@itu.dk}
@@ -991,7 +1182,7 @@ Next we provide a quick overview of the \mTamarin{} tool, and describe our model
 %-------------------------------------------------------------------------- sub
 \subsection{\mTamarin{}}
 \label{sec:tamarin}
-We extend the formal \mEdhoc{} model of~\cite{Norr21}, using the tool \mTamarin{}~\cite{DBLP:conf/cav/MeierSCB13}, which is an 
+We extend the formal model of~\cite{Norr21}, using the tool \mTamarin{}~\cite{DBLP:conf/cav/MeierSCB13}, which is an 
 interactive
 tool for the symbolic verification of security protocols.
 %
@@ -1142,7 +1333,7 @@ a modified version of a figure in~\cite{Norr21}.
 %Note that the properties in Figure~\ref{fig:props} are unlike the actual \mTamarin{} lemma in one minor way -- in the \mTamarin{} code, we only check that the TEE is accessed after the start of the session, since the long-term key reveal event covers the reveal of all long-term and session keys after the end of the session.
 %\vnote{Check that this is right}
 
-\begin{figure*}[ht]
+\begin{figure*}[htp]
 \begin{align*}
     \mPredPcs \triangleq\ & \forall \mTID, I, R, \mSessKey, t_2, t_3\mLogicDot
     \mK^{t_3}(\mSessKey)\  \land\ 
@@ -1155,24 +1346,24 @@ I, R,
     \ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(R, \mSessKey))
     \ \lor\ (\exists t_1\mLogicDot \mRevEph^{t_1}(I, \mSessKey))\\
-	&\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID, I, R) \land 
+	&\ \lor\ (\exists t_0, t_1, Z'\mLogicDot \mIStart^{t_0}(\mTID, I, R, Z') \land 
 \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, I, R) 
+    &\ \lor\ (\exists t_0, t_1, Z'\mLogicDot \mRStart^{t_0}(\mTID, I, R, Z') 
 \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[1em]
 %    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID, R, \mSessKey, S) 
 %\land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[2em]
 %
     \mPredInjI \triangleq\ &
-    \forall \mTID_I, I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(I, R, 
+    \forall \mTID_I, I, R, \mSessKey, S, t_2\mLogicDot \mIComplete^{t_2}(\mTID_{I}, I, R, 
 \mSessKey, S)
     \rightarrow\\
     &(\exists \mTID_R, t_1\mLogicDot \mRStart^{t_1}(\mTID_R, R, \mSessKey, 
 S) \land t_1 \lessdot t_2
     \land (\forall \mTID_I', I', R', t_1' \mLogicDot \mIComplete^{t_1'}(\mTID_I', 
 I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1))\\
+        \rightarrow t_1' \doteq t_2))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(R) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land 
+    &\ \lor\ (\exists t_0, t_1, Z'\mLogicDot \mIStart^{t_0}(\mTID_I, I, R, Z') \land 
 \mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[1em]
 %
     \mPredInjR \triangleq\ &
@@ -1186,10 +1377,10 @@ S) \land t_1 \lessdot t_2
     \land (\forall \mTID_R', I' R' t_1' \mLogicDot 
 \mRComplete^{t_1'}(\mTID_R', 
 I' , R', \mSessKey, S)
-        \rightarrow t_1' \doteq t_1))\\
+        \rightarrow t_1' \doteq t_2))\\
     &\ \lor\ (\exists t_1\mLogicDot \mRevLTK^{t_1}(I) \land t_1 \lessdot t_2)\\
-    &\ \lor\ (\exists t_0, t_1\mLogicDot \mRStart^{t_0}(\mTID_R, R, 
-\mSessKey, S) \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot 
+    &\ \lor\ (\exists t_0, t_1, Z', S'\mLogicDot \mRStart^{t_0}(\mTID_R, R, 
+Z', S') \land \mTEE^{t_1}(I) \land (t_0 \lessdot t_1 \land t_1 \lessdot 
 t_2))\\[1em]
 %
     \mPredImpI \triangleq\ &
@@ -1208,11 +1399,29 @@ t_1
     &\lor(\exists t_0\mLogicDot \mRevLTK^{t_0}(R) \land t_0 \lessdot t_1)
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey))\\
-    &\lor\ (\exists t_0, t_1\mLogicDot \mIStart^{t_0}(\mTID_I, I, R) \land 
-\mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))
-\end{align*}
+    &\lor\ (\exists t_0, t_1, Z'\mLogicDot \mIStart^{t_0}(\mTID_I, I, R, Z') \land 
+\mTEE^{t_1}(R) \land (t_0 \lessdot t_1 \land t_1 \lessdot t_2))\\[1em]
 %
-\caption{Formalization of security properties and adversary model.}
+	\mSecADthree \triangleq\ &
+	\forall \mADthree, I, R, \mSessKey, \mTID_{I}, t_{3}, t_{2}\mLogicDot  \mK^{t_{3}}(\mADthree) \land \mISend^{t_{2}}(I, R, \mSessKey, \mADthree, \mTID_{I}) \rightarrow \\
+	& ( (\exists t_{1}\mLogicDot \mRevLTK^{t_{1}}(I) \land t_{1} \lessdot t_{2})\lor(\exists t_{1}\mLogicDot \mRevLTK^{t_{1}}(R) \land t_{1} \lessdot t_{2}) \\
+	&\ \ \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
+     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey)) \\
+    &\ \ \lor(\exists t_{0}, t_{1}, Z'\mLogicDot \mIStart^{t_{0}}(\mTID_{I}, I, R, Z') \land \mTEE^{t_{1}}(R) \land t_{0} \lessdot t_{1}) \\
+    &\ \ \lor(\exists t_{0}, t_{1}, t_{4}, \mTID_{R}, Z', S'\mLogicDot \mTEE^{t_{1}}(I) \land \mRRecv^{t_{4}}(I, R, Z, \mADthree, \mTID_{R}) \land \mRStart^{t_{0}}(\mTID_{R}, R, Z', S') \land t_{0} \lessdot t_{1}))\\[1em]
+%
+	\mIntADthree \triangleq\ &
+	\forall \mADthree, I, R, \mSessKey, \mTID_{R}, t_{3}\mLogicDot 
+	\mRRecv^{t_{3}}(I, R, \mSessKey, \mADthree, \mTID_{R}) \rightarrow \\
+	& ( (\exists \mTID_{I}, t_{2}\mLogicDot \mISend^{t_{2}}(I, R, \mSessKey, \mADthree, \mTID_{I}) \land t_{2} \lessdot t_{3}) \\
+	&\ \lor (\exists t_{2}\mLogicDot \mRevLTK^{t_{2}}(I) \land t_{2} \lessdot t_{3}) \lor(\exists t_{2}\mLogicDot \mRevLTK^{t_{2}}(R) \land t_{2} \lessdot t_{3}) \\
+	&\ \ \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(R, \mSessKey))
+     \lor(\exists t_0\mLogicDot \mRevEph^{t_0}(I, \mSessKey)) \\
+     &\ \ \lor(\exists t_{0}, t_{1}, t_{2}, \mTID_{I}, Z'\mLogicDot \mTEE^{t_{1}}(R) \land \mISend^{t_{2}}(I, R, \mSessKey, \mADthree, \mTID_{I}) \land \mIStart^{t_{0}}(\mTID_{I}, I, R, Z') \land t_{0} \lessdot t_{1}) \\
+     &\ \ \lor(\exists t_{0}, t_{1}, Z', S'\mLogicDot \mTEE^{t_{1}}(I) \land \mRStart^{t_{0}}(\mTID_{R}, R, Z', S') \land t_{0} \lessdot t_{1})
+	)
+\end{align*}
+\caption{Formalization of security properties}
 \label{fig:props}
 \end{figure*}
 
@@ -1242,8 +1451,7 @@ believes $I$ is the party playing the initiator role.
 %
 Intuitively, the PCS property states that an adversary obtains \mSessKey{}
 only if one of the following conditions hold: either a party's long-term key
-is compromised before their run ends, or \mSessKey{} is directly revealed to
-the attacker, or the TEE interface for the responder is used during the current
+is compromised before their run ends, or the TEE interface for the responder is used during the current
 session for the initiator, i.e., after the initiator starts and before it
 completes, or, similarly, the TEE interface for the initiator is used during the
 current session for the responder.
@@ -1438,7 +1646,7 @@ As in~\cite{Norr21}, we only present the \mStatSig{} method which illustrates
 the use of two different authentication methods.
 %
 The full \mTamarin{} code for all models can be found 
-at~\cite{edhocTamarinRepo}.
+at~\cite{dropboxrepo}.
 %
 
 As mentioned in Section~\ref{sec:tamarin}, we extend the default
@@ -1700,7 +1908,7 @@ Other properties are formalized similarly.
 
 \begin{scriptsize}
 \begin{verbatim}
-1 lemma secrecyPFS:
+1 lemma secrecyPCS:
 2    all-traces
 3    "All u v sk tid #t3 #t2.
 4       (K(sk)@t3 & CompletedRun(u, v, sk, tid)@t2) ==>
@@ -1727,7 +1935,7 @@ Lines 8 and 9 captures that the parties TEEs must be inaccessible to the
 adversary between the start and end of the execution as seen by each party
 respectively.
 %
-
+The entire code can be found at~\cite{dropboxrepo}.
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Error Handling}}
 \label{sec:errorHandling}
@@ -2198,12 +2406,13 @@ The latest version at the time of writing is
 v15 (July 2022)~\cite{draft-ietf-lake-edhoc-15}, which, among other things,
 differ from v5 in terms of some inputs to the key derivations.
 %
+Modelling the new key derivation function would have needed sweeping changes across our entire formal model, and due to paucity of time, we could not modify the Tamarin model to be up to date with the current version.
+%
 However, we do refer to various aspects
 (error handling, denial of service etc) of this latest version,
 in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 %
-Due to lack of time we unfortunately could not bring the Tamarin model up to
-date with v15~\cite{draft-ietf-lake-edhoc-15}.
+Modelling the latest version of the protocol is left as future work.
 %
 
 %-------------------------------------------------------------------------- ack

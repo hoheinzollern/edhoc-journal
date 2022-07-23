@@ -261,28 +261,19 @@ pages = {198-208}
 	abstract =	{This document defines Object Security for Constrained RESTful Environments (OSCORE), a method for application-layer protection of the Constrained Application Protocol (CoAP), using CBOR Object Signing and Encryption (COSE). OSCORE provides end-to-end protection between endpoints communicating using CoAP or CoAP-mappable HTTP. OSCORE is designed for constrained nodes and networks supporting a range of proxy operations, including translation between different transport protocols. Although an optional functionality of CoAP, OSCORE alters CoAP options processing and IANA registration. Therefore, this document updates RFC 7252.},
 }
 
-@misc{our-analysis-selander-lake-edhoc-00,
-	number =	{draft-selander-lake-edhoc-00},
-	type =		{IETF Internet-Draft},
-	url =		{https://datatracker.ietf.org/doc/html/draft-ietf-lake-edhoc-00},
-    author =	{Göran Selander and John Mattsson and Francesca Palombini},
-	title =		{{Ephemeral Diffie-Hellman Over COSE (EDHOC)}},
-	pagetotal =	60,
-	year =		2020,
-	abstract =	{This document specifies Ephemeral Diffie-Hellman Over COSE (EDHOC), a very compact, and lightweight authenticated Diffie-Hellman key exchange with ephemeral keys. EDHOC provides mutual authentication, perfect forward secrecy, and identity protection. EDHOC is intended for usage in constrained scenarios and a main use case is to establish an OSCORE security context. By reusing COSE for cryptography, CBOR for encoding, and CoAP for transport, the additional code footprint can be kept very low.},
-}
-
-@techreport{selander-ace-cose-ecdhe-08,
-	number =	{draft-selander-ace-cose-ecdhe-08},
-	type =		{IETF Internet-Draft},
-	url =		{https://datatracker.ietf.org/doc/html/draft-selander-ace-cose-ecdhe-08},
-    author =	{Göran Selander and John Mattsson and Francesca Palombini},
-	title =		{{Ephemeral Diffie-Hellman Over COSE (EDHOC)}},
-	pagetotal =	30,
-	year =		2018,
-	month =		mar,
-	day =		5,
-	abstract =	{This document specifies Ephemeral Diffie-Hellman Over COSE (EDHOC), a compact, and lightweight authenticated Diffie-Hellman key exchange with ephemeral keys that can be used over any layer. EDHOC messages are encoded with CBOR and COSE, allowing reuse of existing libraries.},
+@techreport{our-analysis-selander-lake-edhoc-00,
+    number =    {draft-ietf-lake-edhoc-00},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-ietf-lake-edhoc/00/},
+        author =    {Göran Selander and John Preuß Mattsson and Francesca Palombini},
+    title =     {{Ephemeral Diffie-Hellman Over COSE (EDHOC)}},
+    pagetotal = 61,
+    year = 2020,
+    month = jul,
+    abstract =  {This document specifies Ephemeral Diffie-Hellman Over COSE (EDHOC), a very compact, and lightweight authenticated Diffie-Hellman key exchange with ephemeral keys. EDHOC provides mutual authentication, perfect forward secrecy, and identity protection. EDHOC is intended for usage in constrained scenarios and a main use case is to establish an OSCORE security context. By reusing COSE for cryptography, CBOR for encoding, and CoAP for transport, the additional code footprint can be kept very low.},
 }
 
 @techreport{ietf-tls-tls13-11,
@@ -467,11 +458,11 @@ pages = {198-208}
 	abstract =	{The Constrained Application Protocol (CoAP) is a specialized web transfer protocol for use with constrained nodes and constrained (e.g., low-power, lossy) networks. The nodes often have 8-bit microcontrollers with small amounts of ROM and RAM, while constrained networks such as IPv6 over Low-Power Wireless Personal Area Networks (6LoWPANs) often have high packet error rates and a typical throughput of 10s of kbit/s. The protocol is designed for machine- to-machine (M2M) applications such as smart energy and building automation. CoAP provides a request/response interaction model between application endpoints, supports built-in discovery of services and resources, and includes key concepts of the Web such as URIs and Internet media types. CoAP is designed to easily interface with HTTP for integration with the Web while meeting specialized requirements such as multicast support, very low overhead, and simplicity for constrained environments.},
 }
 
-@misc{edhocTamarinRepo,
+@misc{dropboxrepo,
     author = {Karl Norrman and Vaishnavi Sundararajan and Alessandro Bruni},
     title = {Code repository},
-	  howpublished = {\url{https://github.com/hoheinzollern/EDHOC-Verification/tree/master/models/edhoc/draftedhoc-20200301}},
-    year = {2020}
+	  howpublished = {\url{https://www.dropbox.com/sh/y3dk6t421040mq9/AADct4SSGOhOlbx6mFszvq-da?dl=0}},
+    year = {2022}
 }
 
 @misc{personalCommunication,
@@ -714,4 +705,5 @@ day =       10
   biburl    = {https://dblp.org/rec/conf/icics/XuZRWTZ20.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
 
