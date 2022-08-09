@@ -2307,34 +2307,67 @@ necessary to provide explicit injective agreement on $P_{I}$.
 %-------------------------------------------------------------------------- sec
 \section{\uppercase{Conclusions and Future Work}}
 \label{sec:conclusion}
-We formally modeled all four
-methods of the \mEdhoc{} \mSpec{} using \mTamarin.
+As part of this paper, we modeled all four authentication methods of the \mEdhoc{} protocol using the \mTamarin{} verification tool.
 %
-We formulated several important security properties and identified precise
-adversary models in which we verified these.
+We used a server with 2 Intel(R) Xeon(R) Gold 6242 CPU @ 2.80GHz, which had a total of 32 cores / 64 threads, and of the total 384GiB, the server allotted 256GiB of memory for the \mTamarin{} job.
 %
-The properties are shown in Table~\ref{tab:props}.
+We report both the time taken to complete the task (``real time'') and the CPU time spent on the task (``user time'').
 %
-Mutual injective agreement covers the parameters $S_P$:
-responder identity, roles, session-key material (except for $P_I$ when
-initiator uses the \mStat{} authentication
-method), context identifiers \mCi{} and \mCr, and cipher suites \mSuites.
+Time measurements are rounded to the nearest second.
 %
-The responder in addition is ensured agreement on the initiators identity and
-$P_I$, i.e., on the set $S_F$.
+We formulated and verified the following properties in a precise adversary model with controlled access to TEEs and a precise modelling of \mXor.
 %
-Implicit agreement covers all previously mentioned parameters for both 
-peers.
+\begin{itemize}
+\item Injective agreement for both $I$ and $R$
+\item Implicit agreement for both $I$ and $R$
+\item Session key secrecy
+\item Secrecy and integrity of \mADthree
+\end{itemize}
 %
-All measurements were taken on a server with 2 Intel(R) Xeon(R) Gold
-6242 CPU @ 2.80GHz with a total of 32 cores / 64 threads and reserved
-256 GiB of memory for the scheduled job (the machine has a total of
-384 GiB installed).
+We consider two separate sets of parameters, $S_P$ and $S_F$. 
 %
-Time measurements are rounded to the nearest second and we report both
-the real time (time to complete the task) and user time (total CPU time
-spent for the task).
+The set $S_P$ consists of the following pieces of information: the identity of the responder, roles, context identifierss \mCi{} and \mCr, cipher suites \mSuites, and session-key material excluding $P_I$.
 %
+For injective agreement, when the initiator uses a \mStat{} method, they are ensured agreement only on this above set of parameters. 
+%
+The set $S_F$ is the set $S_P$ along with the initiator's identity and $P_I$. 
+%
+The responder is guaranteed injective agreement on the parameters $S_F$, irrespective of what method they run, while the initiator is guaranteed injective agreement on $S_F$ as long as they run a \mSig{} method.
+%
+Implicit agreement can be reached for both parties on the set $S_F$.
+%
+In addition, mutual entity authentication, UKS- and KCI-resistance can be inferred from the verified properties.
+%
+We present the results in Table~\ref{tab:props}.
+
+%We formally modeled all four
+%methods of the \mEdhoc{} \mSpec{} using \mTamarin.
+%
+% We formulated several important security properties and identified precise
+% adversary models in which we verified these.
+% %
+%The properties are shown in Table~\ref{tab:props}.
+%
+% Mutual injective agreement covers the parameters $S_P$:
+% responder identity, roles, session-key material (except for $P_I$ when
+% initiator uses the \mStat{} authentication
+% method), context identifiers \mCi{} and \mCr, and cipher suites \mSuites.
+% %
+% The responder in addition is ensured agreement on the initiators identity and
+% $P_I$, i.e., on the set $S_F$.
+% %
+% Implicit agreement covers all previously mentioned parameters for both 
+% peers.
+% %
+% All measurements were taken on a server with 2 Intel(R) Xeon(R) Gold
+% 6242 CPU @ 2.80GHz with a total of 32 cores / 64 threads and reserved
+% 256 GiB of memory for the scheduled job (the machine has a total of
+% 384 GiB installed).
+% %
+% Time measurements are rounded to the nearest second and we report both
+% the real time (time to complete the task) and user time (total CPU time
+% spent for the task).
+% %
 Mutual entity authentication, UKS- and KCI-resistance can be inferred
 from the verified properties.
 %
@@ -2389,6 +2422,8 @@ intended, and proposed a simple mitigation.
 We discussed how the IETF may extract and better define security properties 
 to
 enable easier verification.
+%
+We also discussed some aspects of the protocol with respect to error handling and denial of service attacks.
 
 We verified each method in isolation, and leave as future work to verify 
 whether
@@ -2412,7 +2447,7 @@ However, we do refer to various aspects
 (error handling, denial of service etc) of this latest version,
 in Sections~\ref{sec:errorHandling} and \ref{sec:discussion}.
 %
-Modelling the latest version of the protocol is left as future work.
+Modelling the latest version of the protocol is also left as future work.
 %
 
 %-------------------------------------------------------------------------- ack
