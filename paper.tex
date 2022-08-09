@@ -1330,8 +1330,6 @@ contents of the set $S$.
 We formalize these properties as shown in Figure~\ref{fig:props}, which is
 a modified version of a figure in~\cite{Norr21}.
 %
-%Note that the properties in Figure~\ref{fig:props} are unlike the actual \mTamarin{} lemma in one minor way -- in the \mTamarin{} code, we only check that the TEE is accessed after the start of the session, since the long-term key reveal event covers the reveal of all long-term and session keys after the end of the session.
-%\vnote{Check that this is right}
 
 \begin{figure*}[htp]
 \begin{align*}
@@ -1498,9 +1496,6 @@ before and after the protocol execution.
 %%
 An analogous definition holds for the responder $R$.
 %
-%As part of the formalization, note that we parametrize the \mIStart{} and \mRStart{} events with some subset of \mTID, $I$, $R$, and $Z$, as well as the set $S$ of parameters upon which we check for agreement.
-%%
-%The set $S$ will often include the other party's identity, so, for example, \mRStart{} will not mention the term $I$ as a parameter outside of $S$, and instead just be parametrized by \mTID, $R$, $Z$, and $S$.
 
 %------------------------------------------------------------- Implicit auth
 As part of our analysis, we found that all the \mEdhoc{} methods satisfy weak
@@ -1658,21 +1653,17 @@ Diffie-Hellman operations, signatures (\mT{sign} and \mT{verify} operations),
 and 
 hashing~\cite{DBLP:conf/csfw/DreierHRS18,DBLP:conf/csfw/SchmidtMCB12}.
 %
-We 
-%augment the hashing function symbol to add an extra input, which we use 
-to
-model different hash functions.
-%
 
-In addition to these default operations, \mEdhoc{} is built over the following functions: \mHkdfExpand, \mHkdfExtract, and \mAead{}.
+In addition to these default operations, \mEdhoc{} is built over the following
+functions: \mHkdfExpand, \mHkdfExtract, and \mAead{}.
 %
 We represent \mHkdfExpand{} by \mT{expa} and \mHkdfExtract{} by 
 \mT{extr}.
 %
 \mAead{} operations need us to add extra equations to the underlying theory.
 %
-A term encrypted using the \mAead{} algorithm is represented by \mT{aeadEncrypt(m, k, ad, 
-ai)},
+A term encrypted using the \mAead{} algorithm is represented by
+\mT{aeadEncrypt(m, k, ad, ai)},
 where \mT{m} is the underlying message, \mT{k} is the encrypting key,
 \mT{ad} is the additional data, and \mT{ai} is the identifier for the
 encryption algorithm.
@@ -1737,21 +1728,18 @@ respectively.
 \end{minipage}
 \end{center}
 
-Using the fact \verb|Fr(~ltk)|, \mTamarin{} creates a new term \mT{ltk} and 
-uses
+Using the fact \verb|Fr(~ltk)|, \mTamarin{} creates a new term \mT{ltk} and uses
 it to represent a secret long-term key.
 %
 Via the \verb|Out(<$A, pk(~ltk)>)| fact, \mTamarin{} puts out onto the
 communication channel the identity of the party to whom this long-term
 key belongs, along with their public key.
 %
-Since the adversary has access to the communication channel, they can pick 
-up
+Since the adversary has access to the communication channel, they can pick up
 all of this information.
 %
-The event \mT{UniqLTK} parametrized by a party's identity and their 
-long-term
-key 
+The event \mT{UniqLTK} parametrized by a party's identity and their
+long-term key
 models the unique correspondence between those two values.
 %
 As a result, this rules out a party owning multiple long-term keys
@@ -1766,11 +1754,10 @@ To model the reveal of long-term keys and ephemeral keys to an adversary,
 we use standard reveal rules and events of type \mRevLTK{} and \mRevEph,
 respectively.
 %
-It is also important to keep track of the time points at which these events 
+It is also important to keep track of the time points at which these events
 occur.
 %
-Long-term keys can be revealed on registration, even before the protocol 
-begins.
+Long-term keys can be revealed on registration, even before the protocol begins.
 %
 Ephemeral keys in our model can only be revealed when a party
 completes their role, i.e., simultaneously with events of type \mIComplete{}
@@ -1836,10 +1823,8 @@ with access to them, \mTamarin{} failed to complete in a reasonable time for
 some combination of authentication methods and security properties (see 
 Section~\ref{sec:conclusion} for a detailed discussion).
 %
-To circumvent the problem, we simplified the \mXor{} encryption to 
-\mXor-ing 
-a
-single term on the entire tuple for these cases. \\
+To circumvent the problem, we simplified the \mXor{} encryption to
+\mXor-ing a single term on the entire tuple for these cases. \\
 %
 
 {\parindent 0pt
@@ -2234,12 +2219,6 @@ The four different cryptographic cores included in \mEdhoc{} are based on
 academic protocols which are designed to work with highly specific but
 potentially different adversary models.
 %
-%For example, \mOptls{}, which essentially has the same core as \mStat{}, is
-%shown to be secure in the CK model~\cite{DBLP:conf/crypto/CanettiK02}, which
-%explicitly separates long-term key storage from that of the ephemeral keys and
-%session state.
-%%
-%This fits in well with our use of TEEs.
 Since \mSigma{} cannot protect against compromised ephemeral keys, the authors
 of \mEdhoc{} felt that considering the compromise of ephemeral keys separately
 from that of long-term keys was not required~\cite{personalCommunication}.
@@ -2247,7 +2226,7 @@ from that of long-term keys was not required~\cite{personalCommunication}.
 The reason was presumably based on the fact that the \mSigSig{} method was
 modeled closely on the \mSigmaI{} variant of \mSigma{}, and that it would be
 preferable to obtain a homogeneous security level among the \mEdhoc{}
-methods.~\cite{Norr21}
+methods~\cite{Norr21}.
 %
 However, this only holds true for situations where one is only interested in the
 session key confidentiality for an ongoing session.
